@@ -555,10 +555,8 @@ func TestTx_Clone(t *testing.T) {
 			assert.Equal(t, input.PreviousTxOutIndex, cloneInput.PreviousTxOutIndex)
 			assert.Equal(t, *input.UnlockingScript, *cloneInput.UnlockingScript)
 			assert.False(t, input.UnlockingScript == cloneInput.UnlockingScript)
-			assert.False(t, input.UnlockingScript == cloneInput.UnlockingScript)
 			assert.Equal(t, input.PreviousTxSatoshis, cloneInput.PreviousTxSatoshis)
 			assert.Equal(t, *input.PreviousTxScript, *cloneInput.PreviousTxScript)
-			assert.False(t, input.PreviousTxScript == cloneInput.PreviousTxScript)
 			assert.False(t, input.PreviousTxScript == cloneInput.PreviousTxScript)
 		}
 
@@ -569,7 +567,6 @@ func TestTx_Clone(t *testing.T) {
 			assert.Equal(t, output.Bytes(), cloneOutput.Bytes())
 			assert.Equal(t, output.BytesForSigHash(), cloneOutput.BytesForSigHash())
 			assert.Equal(t, *output.LockingScript, *cloneOutput.LockingScript)
-			assert.False(t, output.LockingScript == cloneOutput.LockingScript)
 			assert.False(t, output.LockingScript == cloneOutput.LockingScript)
 			assert.Equal(t, output.Satoshis, cloneOutput.Satoshis)
 		}

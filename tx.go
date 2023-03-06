@@ -383,10 +383,12 @@ func (tx *Tx) Clone() *Tx {
 			SequenceNumber:     input.SequenceNumber,
 		}
 		if input.UnlockingScript != nil {
-			clone.Inputs[i].UnlockingScript = bscript.NewFromBytes(*input.UnlockingScript)
+			clone.Inputs[i].UnlockingScript = &bscript.Script{}
+			*clone.Inputs[i].UnlockingScript = *input.UnlockingScript
 		}
 		if input.PreviousTxScript != nil {
-			clone.Inputs[i].PreviousTxScript = bscript.NewFromBytes(*input.PreviousTxScript)
+			clone.Inputs[i].PreviousTxScript = &bscript.Script{}
+			*clone.Inputs[i].PreviousTxScript = *input.PreviousTxScript
 		}
 	}
 
@@ -395,7 +397,8 @@ func (tx *Tx) Clone() *Tx {
 			Satoshis: output.Satoshis,
 		}
 		if output.LockingScript != nil {
-			clone.Outputs[i].LockingScript = bscript.NewFromBytes(*output.LockingScript)
+			clone.Outputs[i].LockingScript = &bscript.Script{}
+			*clone.Outputs[i].LockingScript = *output.LockingScript
 		}
 	}
 
