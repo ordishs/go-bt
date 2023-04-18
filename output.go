@@ -91,11 +91,8 @@ func (o *Output) Bytes(inBytes ...[]byte) []byte {
 			byte(o.Satoshis >> 56),
 		}...)
 	} else {
-		b := make([]byte, 8)
-		binary.LittleEndian.PutUint64(b, o.Satoshis)
-
-		h = make([]byte, 0)
-		h = append(h, b...)
+		h = make([]byte, 8)
+		binary.LittleEndian.PutUint64(h, o.Satoshis)
 	}
 
 	h = append(h, VarInt(uint64(len(*o.LockingScript))).Bytes()...)
