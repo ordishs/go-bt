@@ -309,8 +309,9 @@ func (tx *Tx) TxID() string {
 	return hex.EncodeToString(ReverseBytes(crypto.Sha256d(tx.Bytes())))
 }
 
-func (tx *Tx) TxIDChainHash() chainhash.Hash {
-	return chainhash.DoubleHashH(tx.Bytes())
+func (tx *Tx) TxIDChainHash() *chainhash.Hash {
+	hash := chainhash.DoubleHashH(tx.Bytes())
+	return &hash
 }
 
 // String encodes the transaction into a hex string.
