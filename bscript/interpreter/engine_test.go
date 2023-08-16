@@ -1002,15 +1002,24 @@ func TestExecute2(t *testing.T) {
 		prevTx, err := bt.NewTxFromString(txHex2a)
 		require.NoError(t, err)
 
-		inputIdx := 0
-		input := tx.InputIdx(inputIdx)
-		prevOutput := prevTx.OutputIdx(int(input.PreviousTxOutIndex))
+			prevTx, err := bt.NewTxFromString(tc.prevTxHex)
+			require.NoError(t, err)
 
-		err = NewEngine().Execute(
-			WithTx(tx, inputIdx, prevOutput),
-			WithForkID(),
-			WithAfterGenesis(),
-		)
-		require.NoError(t, err)
-	})
+			inputIdx := 0
+			input := tx.InputIdx(inputIdx)
+			prevOutput := prevTx.OutputIdx(int(input.PreviousTxOutIndex))
+
+			err = NewEngine().Execute(
+				WithTx(tx, inputIdx, prevOutput),
+				WithForkID(),
+				WithAfterGenesis(),
+			)
+
+			afterScript, _ := tx.Inputs[0].UnlockingScript.ToASM()
+
+			require.Equal(t, beforeScript, afterScript)
+
+			require.NoError(t, err)
+		})
+	}
 }
