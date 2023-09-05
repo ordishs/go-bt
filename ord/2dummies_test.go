@@ -8,6 +8,7 @@ import (
 	"github.com/libsv/go-bk/wif"
 	"github.com/libsv/go-bt/v2"
 	"github.com/libsv/go-bt/v2/bscript"
+	"github.com/libsv/go-bt/v2/chainhash"
 	"github.com/libsv/go-bt/v2/ord"
 	"github.com/libsv/go-bt/v2/unlocker"
 	"github.com/stretchr/testify/assert"
@@ -24,8 +25,8 @@ func TestBidToBuyPSBT2DNoErrors(t *testing.T) {
 
 	us := []*bt.UTXO{
 		{
-			TxID: func() []byte {
-				t, _ := hex.DecodeString("411084d83d4f380cfc331ed849946bd7f354ca17138dbd723a6420ec9f5f4bd1")
+			TxIDHash: func() *chainhash.Hash {
+				t, _ := chainhash.NewHashFromStr("411084d83d4f380cfc331ed849946bd7f354ca17138dbd723a6420ec9f5f4bd1")
 				return t
 			}(),
 			Vout:          uint32(0),
@@ -34,8 +35,8 @@ func TestBidToBuyPSBT2DNoErrors(t *testing.T) {
 			Unlocker:      &fundingUnlocker,
 		},
 		{
-			TxID: func() []byte {
-				t, _ := hex.DecodeString("411084d83d4f380cfc331ed849946bd7f354ca17138dbd723a6420ec9f5f4bd1")
+			TxIDHash: func() *chainhash.Hash {
+				t, _ := chainhash.NewHashFromStr("411084d83d4f380cfc331ed849946bd7f354ca17138dbd723a6420ec9f5f4bd1")
 				return t
 			}(),
 			Vout:          uint32(1),
@@ -44,8 +45,8 @@ func TestBidToBuyPSBT2DNoErrors(t *testing.T) {
 			Unlocker:      &fundingUnlocker,
 		},
 		{
-			TxID: func() []byte {
-				t, _ := hex.DecodeString("4d815adc39a740810cb438eb285f6e08ae3957fdc4e4806399babfa806dfc456")
+			TxIDHash: func() *chainhash.Hash {
+				t, _ := chainhash.NewHashFromStr("4d815adc39a740810cb438eb285f6e08ae3957fdc4e4806399babfa806dfc456")
 				return t
 			}(),
 			Vout:          uint32(0),
@@ -62,8 +63,8 @@ func TestBidToBuyPSBT2DNoErrors(t *testing.T) {
 	ordUnlocker, _ := ordUnlockerGetter.Unlocker(context.Background(), ordPrefixScript)
 
 	ordUTXO := &bt.UTXO{
-		TxID: func() []byte {
-			t, _ := hex.DecodeString("e17d7856c375640427943395d2341b6ed75f73afc8b22bb3681987278978a584")
+		TxIDHash: func() *chainhash.Hash {
+			t, _ := chainhash.NewHashFromStr("e17d7856c375640427943395d2341b6ed75f73afc8b22bb3681987278978a584")
 			return t
 		}(),
 		Vout: uint32(81),

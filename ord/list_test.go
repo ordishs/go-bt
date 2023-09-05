@@ -8,6 +8,7 @@ import (
 	"github.com/libsv/go-bk/wif"
 	"github.com/libsv/go-bt/v2"
 	"github.com/libsv/go-bt/v2/bscript"
+	"github.com/libsv/go-bt/v2/chainhash"
 	"github.com/libsv/go-bt/v2/ord"
 	"github.com/libsv/go-bt/v2/unlocker"
 	"github.com/stretchr/testify/assert"
@@ -22,8 +23,8 @@ func TestOfferToSellPSBTNoErrors(t *testing.T) {
 	ordUnlocker, _ := ordUnlockerGetter.Unlocker(context.Background(), ordPrefixScript)
 
 	ordUTXO := &bt.UTXO{
-		TxID: func() []byte {
-			t, _ := hex.DecodeString("8f027fb1361ae46ac165e1d90e5436ed9c11d4eeaa60669ab90386a3abd9ce6a")
+		TxIDHash: func() *chainhash.Hash {
+			t, _ := chainhash.NewHashFromStr("8f027fb1361ae46ac165e1d90e5436ed9c11d4eeaa60669ab90386a3abd9ce6a")
 			return t
 		}(),
 		Vout: uint32(0),
@@ -60,8 +61,8 @@ func TestOfferToSellPSBTNoErrors(t *testing.T) {
 
 	us := []*bt.UTXO{
 		{
-			TxID: func() []byte {
-				t, _ := hex.DecodeString("8f027fb1361ae46ac165e1d90e5436ed9c11d4eeaa60669ab90386a3abd9ce6a")
+			TxIDHash: func() *chainhash.Hash {
+				t, _ := chainhash.NewHashFromStr("8f027fb1361ae46ac165e1d90e5436ed9c11d4eeaa60669ab90386a3abd9ce6a")
 				return t
 			}(),
 			Vout:          uint32(1),
@@ -70,8 +71,8 @@ func TestOfferToSellPSBTNoErrors(t *testing.T) {
 			Unlocker:      &ordUnlocker,
 		},
 		{
-			TxID: func() []byte {
-				t, _ := hex.DecodeString("fcc55cd1a4275e5750070381028d3e3edf99b238bdc56199ff8bdc17dfb599d1")
+			TxIDHash: func() *chainhash.Hash {
+				t, _ := chainhash.NewHashFromStr("fcc55cd1a4275e5750070381028d3e3edf99b238bdc56199ff8bdc17dfb599d1")
 				return t
 			}(),
 			Vout:          uint32(3),
@@ -104,8 +105,8 @@ func TestOfferToSellPSBTNoErrors(t *testing.T) {
 	t.Run("no errors when accepting listing using 2 dummies", func(t *testing.T) {
 		us = append([]*bt.UTXO{
 			{
-				TxID: func() []byte {
-					t, _ := hex.DecodeString("61dfcc313763eb5332c036131facdf92c2ca9d663ffb96e4b997086a0643d635")
+				TxIDHash: func() *chainhash.Hash {
+					t, _ := chainhash.NewHashFromStr("61dfcc313763eb5332c036131facdf92c2ca9d663ffb96e4b997086a0643d635")
 					return t
 				}(),
 				Vout:          uint32(0),
@@ -114,8 +115,8 @@ func TestOfferToSellPSBTNoErrors(t *testing.T) {
 				Unlocker:      &ordUnlocker,
 			},
 			{
-				TxID: func() []byte {
-					t, _ := hex.DecodeString("61dfcc313763eb5332c036131facdf92c2ca9d663ffb96e4b997086a0643d635")
+				TxIDHash: func() *chainhash.Hash {
+					t, _ := chainhash.NewHashFromStr("61dfcc313763eb5332c036131facdf92c2ca9d663ffb96e4b997086a0643d635")
 					return t
 				}(),
 				Vout:          uint32(1),

@@ -3,11 +3,11 @@ package ord
 import (
 	"bytes"
 	"context"
-	"encoding/hex"
 	"fmt"
 
 	"github.com/libsv/go-bt/v2"
 	"github.com/libsv/go-bt/v2/bscript"
+	"github.com/libsv/go-bt/v2/chainhash"
 	"github.com/libsv/go-bt/v2/sighash"
 )
 
@@ -60,7 +60,7 @@ func MakeBidToBuy1SatOrdinal(ctx context.Context, mba *MakeBidArgs) (*bt.Tx, err
 		return nil, fmt.Errorf(`failed to add inputs: %w`, err)
 	}
 
-	OrdinalTxIDBytes, err := hex.DecodeString(mba.OrdinalTxID)
+	OrdinalTxIDHash, err := chainhash.NewHashFromStr(mba.OrdinalTxID)
 	if err != nil {
 		return nil, err
 	}
@@ -74,7 +74,7 @@ func MakeBidToBuy1SatOrdinal(ctx context.Context, mba *MakeBidArgs) (*bt.Tx, err
 			return s
 		}(),
 	}
-	err = emptyOrdInput.PreviousTxIDAdd(OrdinalTxIDBytes)
+	err = emptyOrdInput.PreviousTxIDAdd(OrdinalTxIDHash)
 	if err != nil {
 		return nil, fmt.Errorf(`failed to add ordinal input: %w`, err)
 	}
@@ -122,7 +122,7 @@ func MakeBidToBuy1SatOrdinal(ctx context.Context, mba *MakeBidArgs) (*bt.Tx, err
 		if tx.Inputs[j] == nil {
 			return nil, fmt.Errorf("input expected at index %d doesn't exist", j)
 		}
-		if !(bytes.Equal(u.TxID, tx.Inputs[j].PreviousTxID())) {
+		if !bytes.Equal(u.TxIDHash.CloneBytes(), tx.Inputs[j].PreviousTxID()) {
 			return nil, bt.ErrUTXOInputMismatch
 		}
 		if *u.Unlocker == nil {
@@ -161,7 +161,7 @@ func (vba *ValidateBidArgs) Validate(pstx *bt.Tx) bool {
 
 	// check OrdinalUTXO matches supplied pstx input index 1
 	pstxOrdinalInput := pstx.Inputs[1]
-	if !bytes.Equal(pstxOrdinalInput.PreviousTxID(), vba.OrdinalUTXO.TxID) {
+	if !bytes.Equal(pstxOrdinalInput.PreviousTxID(), vba.OrdinalUTXO.TxIDHash.CloneBytes()) {
 		return false
 	}
 	if uint64(pstxOrdinalInput.PreviousTxOutIndex) != uint64(vba.OrdinalUTXO.Vout) {
@@ -193,7 +193,6 @@ type AcceptBidArgs struct {
 
 // AcceptBidToBuy1SatOrdinal accepts a partially signed Bitcoin
 // transaction bid to buy an ordinal.
-//
 func AcceptBidToBuy1SatOrdinal(ctx context.Context, vba *ValidateBidArgs, aba *AcceptBidArgs) (*bt.Tx, error) {
 	if valid := vba.Validate(aba.PSTx); !valid {
 		return nil, bt.ErrInvalidSellOffer

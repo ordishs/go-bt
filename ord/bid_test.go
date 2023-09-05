@@ -9,6 +9,7 @@ import (
 	"github.com/libsv/go-bk/wif"
 	"github.com/libsv/go-bt/v2"
 	"github.com/libsv/go-bt/v2/bscript"
+	"github.com/libsv/go-bt/v2/chainhash"
 	"github.com/libsv/go-bt/v2/ord"
 	"github.com/libsv/go-bt/v2/unlocker"
 	"github.com/stretchr/testify/assert"
@@ -25,8 +26,8 @@ func TestBidToBuyPSBTNoErrors(t *testing.T) {
 
 	us := []*bt.UTXO{
 		{
-			TxID: func() []byte {
-				t, _ := hex.DecodeString("e3e0c0b46826ae1cd8932daf70b280d686104cdd5c685dbe6bed823e437f9040")
+			TxIDHash: func() *chainhash.Hash {
+				t, _ := chainhash.NewHashFromStr("e3e0c0b46826ae1cd8932daf70b280d686104cdd5c685dbe6bed823e437f9040")
 				return t
 			}(),
 			Vout:          uint32(0),
@@ -35,8 +36,8 @@ func TestBidToBuyPSBTNoErrors(t *testing.T) {
 			Unlocker:      &fundingUnlocker,
 		},
 		{
-			TxID: func() []byte {
-				t, _ := hex.DecodeString("44ab22c6996ce2dee4829fa171dd2543f16bd35b7373aa446b3060bdbf43b588")
+			TxIDHash: func() *chainhash.Hash {
+				t, _ := chainhash.NewHashFromStr("44ab22c6996ce2dee4829fa171dd2543f16bd35b7373aa446b3060bdbf43b588")
 				return t
 			}(),
 			Vout:          uint32(0),
@@ -47,8 +48,8 @@ func TestBidToBuyPSBTNoErrors(t *testing.T) {
 	}
 
 	ordUTXO := &bt.UTXO{
-		TxID: func() []byte {
-			t, _ := hex.DecodeString("75e24ffd0161f094a5e419dba42684c69faeacbeb805a1d9afdb29f6f4ac81ad")
+		TxIDHash: func() *chainhash.Hash {
+			t, _ := chainhash.NewHashFromStr("75e24ffd0161f094a5e419dba42684c69faeacbeb805a1d9afdb29f6f4ac81ad")
 			return t
 		}(),
 		Vout: uint32(0),

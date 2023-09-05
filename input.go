@@ -2,11 +2,11 @@ package bt
 
 import (
 	"encoding/binary"
-	"encoding/hex"
 	"fmt"
 	"io"
 
 	"github.com/libsv/go-bt/v2/bscript"
+	"github.com/libsv/go-bt/v2/chainhash"
 	"github.com/pkg/errors"
 )
 
@@ -29,7 +29,7 @@ const DefaultSequenceNumber uint32 = 0xFFFFFFFF
 //
 // DO NOT CHANGE ORDER - Optimised for memory via maligned
 type Input struct {
-	previousTxID       []byte
+	previousTxIDHash   *chainhash.Hash
 	PreviousTxSatoshis uint64
 	PreviousTxScript   *bscript.Script
 	UnlockingScript    *bscript.Script
@@ -87,7 +87,10 @@ func (i *Input) readFrom(r io.Reader, extended bool) (int64, error) {
 		return bytesRead, errors.Wrapf(err, "sequence(4): got %d bytes", n)
 	}
 
-	i.previousTxID = ReverseBytes(previousTxID)
+	i.previousTxIDHash, err = chainhash.NewHash(previousTxID)
+	if err != nil {
+		return bytesRead, errors.Wrap(err, "could not read hash")
+	}
 	i.PreviousTxOutIndex = binary.LittleEndian.Uint32(prevIndex)
 	i.UnlockingScript = bscript.NewFromBytes(script)
 	i.SequenceNumber = binary.LittleEndian.Uint32(sequence)
@@ -104,20 +107,20 @@ func (i *Input) readFrom(r io.Reader, extended bool) (int64, error) {
 
 		// Read in the prevTxLockingScript
 		var scriptLen VarInt
-		n64, err := scriptLen.ReadFrom(r)
-		bytesRead += n64
+		n64b, err := scriptLen.ReadFrom(r)
+		bytesRead += n64b
 		if err != nil {
 			return bytesRead, err
 		}
 
-		script := make([]byte, scriptLen)
-		n, err := io.ReadFull(r, script)
-		bytesRead += int64(n)
+		newScript := make([]byte, scriptLen)
+		nRead, err := io.ReadFull(r, newScript)
+		bytesRead += int64(nRead)
 		if err != nil {
-			return bytesRead, errors.Wrapf(err, "script(%d): got %d bytes", scriptLen.Length(), n)
+			return bytesRead, errors.Wrapf(err, "script(%d): got %d bytes", scriptLen.Length(), nRead)
 		}
 
-		prevTxLockingScript = *bscript.NewFromBytes(script)
+		prevTxLockingScript = *bscript.NewFromBytes(newScript)
 
 		i.PreviousTxSatoshis = binary.LittleEndian.Uint64(prevSatoshis)
 		i.PreviousTxScript = bscript.NewFromBytes(prevTxLockingScript)
@@ -128,32 +131,36 @@ func (i *Input) readFrom(r io.Reader, extended bool) (int64, error) {
 
 // PreviousTxIDAdd will add the supplied txID bytes to the Input,
 // if it isn't a valid transaction id an ErrInvalidTxID error will be returned.
-func (i *Input) PreviousTxIDAdd(txID []byte) error {
-	if !IsValidTxID(txID) {
+func (i *Input) PreviousTxIDAdd(txIDHash *chainhash.Hash) error {
+	if !IsValidTxID(txIDHash) {
 		return ErrInvalidTxID
 	}
-	i.previousTxID = txID
+	i.previousTxIDHash = txIDHash
 	return nil
 }
 
 // PreviousTxIDAddStr will validate and add the supplied txID string to the Input,
 // if it isn't a valid transaction id an ErrInvalidTxID error will be returned.
 func (i *Input) PreviousTxIDAddStr(txID string) error {
-	bb, err := hex.DecodeString(txID)
+	hash, err := chainhash.NewHashFromStr(txID)
 	if err != nil {
 		return err
 	}
-	return i.PreviousTxIDAdd(bb)
+	return i.PreviousTxIDAdd(hash)
 }
 
 // PreviousTxID will return the PreviousTxID if set.
 func (i *Input) PreviousTxID() []byte {
-	return i.previousTxID
+	return i.previousTxIDHash.CloneBytes()
 }
 
 // PreviousTxIDStr returns the Previous TxID as a hex string.
 func (i *Input) PreviousTxIDStr() string {
-	return hex.EncodeToString(i.previousTxID)
+	return i.previousTxIDHash.String()
+}
+
+func (i *Input) PreviousTxIDChainHash() *chainhash.Hash {
+	return i.previousTxIDHash
 }
 
 // String implements the Stringer interface and returns a string
@@ -166,7 +173,7 @@ scriptLen:    %d
 script:       %s
 sequence:     %x
 `,
-		hex.EncodeToString(i.previousTxID),
+		i.previousTxIDHash.String(),
 		i.PreviousTxOutIndex,
 		len(*i.UnlockingScript),
 		i.UnlockingScript,
@@ -175,7 +182,7 @@ sequence:     %x
 }
 
 // Bytes encodes the Input into a hex byte array.
-func (i *Input) Bytes(clear bool, intoBytes ...[]byte) []byte {
+func (i *Input) Bytes(clearLockingScript bool, intoBytes ...[]byte) []byte {
 	var h []byte
 	if len(intoBytes) > 0 {
 		h = intoBytes[0]
@@ -183,9 +190,8 @@ func (i *Input) Bytes(clear bool, intoBytes ...[]byte) []byte {
 		h = make([]byte, 0)
 	}
 
-	// add the previous tx ID in reversed order
-	for j := len(i.previousTxID) - 1; j >= 0; j = j - 2 {
-		h = append(h, []byte{i.previousTxID[j], i.previousTxID[j-1]}...)
+	if i.previousTxIDHash != nil {
+		h = append(h, i.previousTxIDHash.CloneBytes()...)
 	}
 
 	// this is optimised to avoid the memory allocation of LittleEndianBytes
@@ -196,7 +202,7 @@ func (i *Input) Bytes(clear bool, intoBytes ...[]byte) []byte {
 		byte(i.PreviousTxOutIndex >> 24),
 	}...)
 
-	if clear {
+	if clearLockingScript {
 		h = append(h, 0x00)
 	} else {
 		if i.UnlockingScript == nil {

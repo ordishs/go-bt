@@ -15,6 +15,7 @@ import (
 	. "github.com/libsv/go-bk/wif"
 	"github.com/libsv/go-bt/v2"
 	"github.com/libsv/go-bt/v2/bscript"
+	"github.com/libsv/go-bt/v2/chainhash"
 	"github.com/libsv/go-bt/v2/testing/data"
 	"github.com/libsv/go-bt/v2/unlocker"
 	"github.com/stretchr/testify/assert"
@@ -98,7 +99,7 @@ func TestNewTxFromString(t *testing.T) {
 			PreviousTxOutIndex: 0,
 			SequenceNumber:     bt.DefaultSequenceNumber,
 		}
-		assert.NoError(t, i.PreviousTxIDAdd(tx.InputIdx(0).PreviousTxID()))
+		assert.NoError(t, i.PreviousTxIDAdd(tx.InputIdx(0).PreviousTxIDChainHash()))
 		i.UnlockingScript, err = bscript.NewFromHexString("47304402205cc711985ce2a6d61eece4f9b6edd6337bad3b7eca3aa3ce59bc15620d8de2a80220410c92c48a226ba7d5a9a01105524097f673f31320d46c3b61d2378e6f05320041")
 		assert.NoError(t, err)
 		assert.NotNil(t, i.UnlockingScript)
@@ -518,7 +519,7 @@ func Test_IsValidTxID(t *testing.T) {
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			bb, _ := hex.DecodeString(test.txid)
+			bb, _ := chainhash.NewHashFromStr(test.txid)
 			assert.Equal(t, test.exp, bt.IsValidTxID(bb))
 		})
 	}

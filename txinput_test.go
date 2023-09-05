@@ -10,6 +10,7 @@ import (
 	. "github.com/libsv/go-bk/wif"
 	"github.com/libsv/go-bt/v2"
 	"github.com/libsv/go-bt/v2/bscript"
+	"github.com/libsv/go-bt/v2/chainhash"
 	"github.com/libsv/go-bt/v2/sighash"
 	"github.com/libsv/go-bt/v2/unlocker"
 	"github.com/stretchr/testify/assert"
@@ -83,7 +84,7 @@ func TestTx_From(t *testing.T) {
 
 		inputs := tx.Inputs
 		assert.Equal(t, 1, len(inputs))
-		assert.Equal(t, "07912972e42095fe58daaf09161c5a5da57be47c2054dc2aaa52b30fefa1940b", hex.EncodeToString(inputs[0].PreviousTxID()))
+		assert.Equal(t, "07912972e42095fe58daaf09161c5a5da57be47c2054dc2aaa52b30fefa1940b", inputs[0].PreviousTxIDStr())
 		assert.Equal(t, uint32(0), inputs[0].PreviousTxOutIndex)
 		assert.Equal(t, uint64(4000000), inputs[0].PreviousTxSatoshis)
 		assert.Equal(t, bt.DefaultSequenceNumber, inputs[0].SequenceNumber)
@@ -99,11 +100,11 @@ func TestTx_FromUTXOs(t *testing.T) {
 		script, err := bscript.NewFromHexString("76a914af2590a45ae401651fdbdf59a76ad43d1862534088ac")
 		assert.NoError(t, err)
 
-		txID, err := hex.DecodeString("07912972e42095fe58daaf09161c5a5da57be47c2054dc2aaa52b30fefa1940b")
+		txID, err := chainhash.NewHashFromStr("07912972e42095fe58daaf09161c5a5da57be47c2054dc2aaa52b30fefa1940b")
 		assert.NoError(t, err)
 
 		assert.NoError(t, tx.FromUTXOs(&bt.UTXO{
-			TxID:          txID,
+			TxIDHash:      txID,
 			LockingScript: script,
 			Vout:          0,
 			Satoshis:      1000,
@@ -121,21 +122,21 @@ func TestTx_FromUTXOs(t *testing.T) {
 		tx := bt.NewTx()
 		script, err := bscript.NewFromHexString("76a914af2590a45ae401651fdbdf59a76ad43d1862534088ac")
 		assert.NoError(t, err)
-		txID, err := hex.DecodeString("07912972e42095fe58daaf09161c5a5da57be47c2054dc2aaa52b30fefa1940b")
+		txID, err := chainhash.NewHashFromStr("07912972e42095fe58daaf09161c5a5da57be47c2054dc2aaa52b30fefa1940b")
 		assert.NoError(t, err)
 
 		script2, err := bscript.NewFromHexString("76a914eb0bd5edba389198e73f8efabddfc61666969ff788ac")
 		assert.NoError(t, err)
-		txID2, err := hex.DecodeString("3c8edde27cb9a9132c22038dac4391496be9db16fd21351565cc1006966fdad5")
+		txID2, err := chainhash.NewHashFromStr("3c8edde27cb9a9132c22038dac4391496be9db16fd21351565cc1006966fdad5")
 		assert.NoError(t, err)
 
 		assert.NoError(t, tx.FromUTXOs(&bt.UTXO{
-			TxID:          txID,
+			TxIDHash:      txID,
 			LockingScript: script,
 			Vout:          0,
 			Satoshis:      1000,
 		}, &bt.UTXO{
-			TxID:          txID2,
+			TxIDHash:      txID2,
 			LockingScript: script2,
 			Vout:          1,
 			Satoshis:      2000,
@@ -173,7 +174,7 @@ func TestTx_Fund(t *testing.T) {
 				return tx
 			}(),
 			utxos: func() []*bt.UTXO {
-				txid, err := hex.DecodeString("07912972e42095fe58daaf09161c5a5da57be47c2054dc2aaa52b30fefa1940b")
+				txid, err := chainhash.NewHashFromStr("07912972e42095fe58daaf09161c5a5da57be47c2054dc2aaa52b30fefa1940b")
 				assert.NoError(t, err)
 				script, err := bscript.NewFromHexString("76a914af2590a45ae401651fdbdf59a76ad43d1862534088ac")
 				assert.NoError(t, err)
@@ -192,7 +193,7 @@ func TestTx_Fund(t *testing.T) {
 				return tx
 			}(),
 			utxos: func() []*bt.UTXO {
-				txid, err := hex.DecodeString("07912972e42095fe58daaf09161c5a5da57be47c2054dc2aaa52b30fefa1940b")
+				txid, err := chainhash.NewHashFromStr("07912972e42095fe58daaf09161c5a5da57be47c2054dc2aaa52b30fefa1940b")
 				assert.NoError(t, err)
 				script, err := bscript.NewFromHexString("76a914af2590a45ae401651fdbdf59a76ad43d1862534088ac")
 				assert.NoError(t, err)
@@ -218,7 +219,7 @@ func TestTx_Fund(t *testing.T) {
 				}
 			},
 			utxos: func() []*bt.UTXO {
-				txid, err := hex.DecodeString("07912972e42095fe58daaf09161c5a5da57be47c2054dc2aaa52b30fefa1940b")
+				txid, err := chainhash.NewHashFromStr("07912972e42095fe58daaf09161c5a5da57be47c2054dc2aaa52b30fefa1940b")
 				assert.NoError(t, err)
 				script, err := bscript.NewFromHexString("76a914af2590a45ae401651fdbdf59a76ad43d1862534088ac")
 				assert.NoError(t, err)
@@ -239,7 +240,7 @@ func TestTx_Fund(t *testing.T) {
 				return tx
 			}(),
 			utxos: func() []*bt.UTXO {
-				txid, err := hex.DecodeString("07912972e42095fe58daaf09161c5a5da57be47c2054dc2aaa52b30fefa1940b")
+				txid, err := chainhash.NewHashFromStr("07912972e42095fe58daaf09161c5a5da57be47c2054dc2aaa52b30fefa1940b")
 				assert.NoError(t, err)
 				script, err := bscript.NewFromHexString("76a914af2590a45ae401651fdbdf59a76ad43d1862534088ac")
 				assert.NoError(t, err)
@@ -258,7 +259,7 @@ func TestTx_Fund(t *testing.T) {
 				return tx
 			}(),
 			utxos: func() []*bt.UTXO {
-				txid, err := hex.DecodeString("07912972e42095fe58daaf09161c5a5da57be47c2054dc2aaa52b30fefa1940b")
+				txid, err := chainhash.NewHashFromStr("07912972e42095fe58daaf09161c5a5da57be47c2054dc2aaa52b30fefa1940b")
 				assert.NoError(t, err)
 				script, err := bscript.NewFromHexString("76a914af2590a45ae401651fdbdf59a76ad43d1862534088ac")
 				assert.NoError(t, err)
@@ -297,7 +298,7 @@ func TestTx_Fund(t *testing.T) {
 				}
 			},
 			utxos: func() []*bt.UTXO {
-				txid, err := hex.DecodeString("07912972e42095fe58daaf09161c5a5da57be47c2054dc2aaa52b30fefa1940b")
+				txid, err := chainhash.NewHashFromStr("07912972e42095fe58daaf09161c5a5da57be47c2054dc2aaa52b30fefa1940b")
 				assert.NoError(t, err)
 				script, err := bscript.NewFromHexString("76a914af2590a45ae401651fdbdf59a76ad43d1862534088ac")
 				assert.NoError(t, err)
@@ -337,7 +338,7 @@ func TestTx_Fund(t *testing.T) {
 				return tx
 			}(),
 			utxos: func() []*bt.UTXO {
-				txid, err := hex.DecodeString("07912972e42095fe58daaf09161c5a5da57be47c2054dc2aaa52b30fefa1940b")
+				txid, err := chainhash.NewHashFromStr("07912972e42095fe58daaf09161c5a5da57be47c2054dc2aaa52b30fefa1940b")
 				assert.NoError(t, err)
 				script, err := bscript.NewFromHexString("76a914af2590a45ae401651fdbdf59a76ad43d1862534088ac")
 				assert.NoError(t, err)
@@ -381,7 +382,7 @@ func TestTx_Fund(t *testing.T) {
 				return tx
 			}(),
 			utxos: func() []*bt.UTXO {
-				txid, err := hex.DecodeString("07912972e42095fe58daaf09161c5a5da57be47c2054dc2aaa52b30fefa1940b")
+				txid, err := chainhash.NewHashFromStr("07912972e42095fe58daaf09161c5a5da57be47c2054dc2aaa52b30fefa1940b")
 				assert.NoError(t, err)
 				script, err := bscript.NewFromHexString("76a914af2590a45ae401651fdbdf59a76ad43d1862534088ac")
 				assert.NoError(t, err)
@@ -459,7 +460,7 @@ func TestTx_Fund_Deficit(t *testing.T) {
 				return tx
 			}(),
 			utxos: func() []*bt.UTXO {
-				txid, err := hex.DecodeString("07912972e42095fe58daaf09161c5a5da57be47c2054dc2aaa52b30fefa1940b")
+				txid, err := chainhash.NewHashFromStr("07912972e42095fe58daaf09161c5a5da57be47c2054dc2aaa52b30fefa1940b")
 				assert.NoError(t, err)
 				script, err := bscript.NewFromHexString("76a914af2590a45ae401651fdbdf59a76ad43d1862534088ac")
 				assert.NoError(t, err)
@@ -482,7 +483,7 @@ func TestTx_Fund_Deficit(t *testing.T) {
 				return tx
 			}(),
 			utxos: func() []*bt.UTXO {
-				txid, err := hex.DecodeString("07912972e42095fe58daaf09161c5a5da57be47c2054dc2aaa52b30fefa1940b")
+				txid, err := chainhash.NewHashFromStr("07912972e42095fe58daaf09161c5a5da57be47c2054dc2aaa52b30fefa1940b")
 				assert.NoError(t, err)
 				script, err := bscript.NewFromHexString("76a914af2590a45ae401651fdbdf59a76ad43d1862534088ac")
 				assert.NoError(t, err)
@@ -509,7 +510,7 @@ func TestTx_Fund_Deficit(t *testing.T) {
 				return tx
 			}(),
 			utxos: func() []*bt.UTXO {
-				txid, err := hex.DecodeString("07912972e42095fe58daaf09161c5a5da57be47c2054dc2aaa52b30fefa1940b")
+				txid, err := chainhash.NewHashFromStr("07912972e42095fe58daaf09161c5a5da57be47c2054dc2aaa52b30fefa1940b")
 				assert.NoError(t, err)
 				script, err := bscript.NewFromHexString("76a914af2590a45ae401651fdbdf59a76ad43d1862534088ac")
 				assert.NoError(t, err)
@@ -552,7 +553,7 @@ func TestTx_Fund_Deficit(t *testing.T) {
 				return tx
 			}(),
 			utxos: func() []*bt.UTXO {
-				txid, err := hex.DecodeString("07912972e42095fe58daaf09161c5a5da57be47c2054dc2aaa52b30fefa1940b")
+				txid, err := chainhash.NewHashFromStr("07912972e42095fe58daaf09161c5a5da57be47c2054dc2aaa52b30fefa1940b")
 				assert.NoError(t, err)
 				script, err := bscript.NewFromHexString("76a914af2590a45ae401651fdbdf59a76ad43d1862534088ac")
 				assert.NoError(t, err)

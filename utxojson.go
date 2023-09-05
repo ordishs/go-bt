@@ -1,10 +1,10 @@
 package bt
 
 import (
-	"encoding/hex"
 	"encoding/json"
 
 	"github.com/libsv/go-bt/v2/bscript"
+	"github.com/libsv/go-bt/v2/chainhash"
 )
 
 type nodeUTXOWrapper struct {
@@ -34,7 +34,7 @@ func (u *UTXO) UnmarshalJSON(body []byte) error {
 		return err
 	}
 
-	txID, err := hex.DecodeString(j.TxID)
+	txID, err := chainhash.NewHashFromStr(j.TxID)
 	if err != nil {
 		return err
 	}
@@ -44,7 +44,7 @@ func (u *UTXO) UnmarshalJSON(body []byte) error {
 		return err
 	}
 
-	u.TxID = txID
+	u.TxIDHash = txID
 	u.LockingScript = lscript
 	u.Vout = j.Vout
 	u.Satoshis = j.Satoshis
@@ -78,7 +78,7 @@ func (n *nodeUTXOWrapper) UnmarshalJSON(b []byte) error {
 		return err
 	}
 
-	txID, err := hex.DecodeString(uj.TxID)
+	txID, err := chainhash.NewHashFromStr(uj.TxID)
 	if err != nil {
 		return err
 	}
@@ -91,7 +91,7 @@ func (n *nodeUTXOWrapper) UnmarshalJSON(b []byte) error {
 	n.UTXO.Satoshis = uint64(uj.Amount * 100000000)
 	n.UTXO.Vout = uj.Vout
 	n.UTXO.LockingScript = lscript
-	n.UTXO.TxID = txID
+	n.UTXO.TxIDHash = txID
 
 	return nil
 }

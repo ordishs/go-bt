@@ -106,7 +106,7 @@ func (tx *Tx) CalcInputPreimage(inputNumber uint32, sigHashFlag sighash.Flag) ([
 	buf = append(buf, hashSequence...)
 
 	//  outpoint (32-byte hash + 4-byte little endian)
-	buf = append(buf, ReverseBytes(in.PreviousTxID())...)
+	buf = append(buf, in.PreviousTxID()...)
 	oi := make([]byte, 4)
 	binary.LittleEndian.PutUint32(oi, in.PreviousTxOutIndex)
 	buf = append(buf, oi...)
@@ -228,7 +228,7 @@ func (tx *Tx) CalcInputPreimageLegacy(inputNumber uint32, shf sighash.Flag) ([]b
 
 	buf = append(buf, VarInt(uint64(len(txCopy.Inputs))).Bytes()...)
 	for _, in := range txCopy.Inputs {
-		buf = append(buf, ReverseBytes(in.PreviousTxID())...)
+		buf = append(buf, in.PreviousTxID()...)
 
 		oi := make([]byte, 4)
 		binary.LittleEndian.PutUint32(oi, in.PreviousTxOutIndex)

@@ -1992,7 +1992,8 @@ func opcodeCheckSig(op *ParsedOpcode, t *thread) error {
 	}
 
 	var sigBytesDer []byte
-	// if the signature is in DER format, we can set it here and just use it directly if an externalVerifySignatureFn is set
+	// if the signature is in DER format, we can set it here and just use it
+	// directly if an externalVerifySignatureFn is set
 	if t.hasAny(scriptflag.VerifyStrictEncoding, scriptflag.VerifyDERSignatures) {
 		sigBytesDer = sigBytes
 	}

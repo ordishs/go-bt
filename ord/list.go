@@ -64,7 +64,7 @@ func (vla *ValidateListingArgs) Validate(pstx *bt.Tx) bool {
 	if vla.ListedOrdinalUTXO == nil {
 		return false
 	}
-	if !bytes.Equal(pstxOrdinalInput.PreviousTxID(), vla.ListedOrdinalUTXO.TxID) {
+	if !bytes.Equal(pstxOrdinalInput.PreviousTxID(), vla.ListedOrdinalUTXO.TxIDHash.CloneBytes()) {
 		return false
 	}
 	if uint64(pstxOrdinalInput.PreviousTxOutIndex) != uint64(vla.ListedOrdinalUTXO.Vout) {
@@ -172,7 +172,7 @@ func AcceptOrdinalSaleListing(ctx context.Context, vla *ValidateListingArgs, aso
 		if tx.Inputs[j] == nil {
 			return nil, fmt.Errorf("input expected at index %d doesn't exist", j)
 		}
-		if !(bytes.Equal(u.TxID, tx.Inputs[j].PreviousTxID())) {
+		if !bytes.Equal(u.TxIDHash.CloneBytes(), tx.Inputs[j].PreviousTxID()) {
 			return nil, bt.ErrUTXOInputMismatch
 		}
 		if *u.Unlocker == nil {

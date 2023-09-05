@@ -4,13 +4,13 @@ import (
 	"bytes"
 	"context"
 	"encoding/binary"
-	"encoding/hex"
 	"fmt"
 
 	"github.com/libsv/go-bk/crypto"
 	"github.com/pkg/errors"
 
 	"github.com/libsv/go-bt/v2/bscript"
+	"github.com/libsv/go-bt/v2/chainhash"
 	"github.com/libsv/go-bt/v2/sighash"
 )
 
@@ -47,8 +47,12 @@ func (tx *Tx) AddP2PKHInputsFromTx(pvsTx *Tx, matchPK []byte) error {
 		}
 
 		if bytes.Equal(utxoPkHASH160, crypto.Hash160(matchPK)) {
+			prevTxIDHash, err := chainhash.NewHash(prevTxIDBytes)
+			if err != nil {
+				return err
+			}
 			if err := tx.FromUTXOs(&UTXO{
-				TxID:          prevTxIDBytes,
+				TxIDHash:      prevTxIDHash,
 				Vout:          uint32(i),
 				Satoshis:      utxo.Satoshis,
 				LockingScript: utxo.LockingScript,
@@ -69,13 +73,13 @@ func (tx *Tx) From(prevTxID string, vout uint32, prevTxLockingScript string, sat
 	if err != nil {
 		return err
 	}
-	pti, err := hex.DecodeString(prevTxID)
+	pti, err := chainhash.NewHashFromStr(prevTxID)
 	if err != nil {
 		return err
 	}
 
 	return tx.FromUTXOs(&UTXO{
-		TxID:          pti,
+		TxIDHash:      pti,
 		Vout:          vout,
 		LockingScript: pts,
 		Satoshis:      satoshis,
@@ -88,13 +92,11 @@ func (tx *Tx) From(prevTxID string, vout uint32, prevTxLockingScript string, sat
 func (tx *Tx) FromUTXOs(utxos ...*UTXO) error {
 	for _, utxo := range utxos {
 		i := &Input{
+			previousTxIDHash:   utxo.TxIDHash,
 			PreviousTxOutIndex: utxo.Vout,
 			PreviousTxSatoshis: utxo.Satoshis,
 			PreviousTxScript:   utxo.LockingScript,
 			SequenceNumber:     DefaultSequenceNumber, // use default finalised sequence number
-		}
-		if err := i.PreviousTxIDAdd(utxo.TxID); err != nil {
-			return err
 		}
 
 		tx.addInput(i)
@@ -174,7 +176,7 @@ func (tx *Tx) PreviousOutHash() []byte {
 	buf := make([]byte, 0)
 
 	for _, in := range tx.Inputs {
-		buf = append(buf, ReverseBytes(in.PreviousTxID())...)
+		buf = append(buf, in.PreviousTxID()...)
 		oi := make([]byte, 4)
 		binary.LittleEndian.PutUint32(oi, in.PreviousTxOutIndex)
 		buf = append(buf, oi...)

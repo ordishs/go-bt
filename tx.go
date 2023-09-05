@@ -156,8 +156,8 @@ func (tx *Tx) ReadFrom(r io.Reader) (int64, error) {
 		}
 	}
 	// ----------------------------------------------------------------------------------
-	// If we have not returned from the previous block, we will have detected a sane
-	// transaction and we will know if it is extended format or not.
+	// If we have not returned from the previous block of code, we will have detected
+	// a sane transaction and we will know if it is extended format or not.
 	// We can now proceed with reading the rest of the transaction.
 	// ----------------------------------------------------------------------------------
 
@@ -322,8 +322,8 @@ func (tx *Tx) String() string {
 // IsValidTxID will check that the txid bytes are valid.
 //
 // A txid should be of 32 bytes length.
-func IsValidTxID(txid []byte) bool {
-	return len(txid) == 32
+func IsValidTxID(txid *chainhash.Hash) bool {
+	return txid != nil && len(txid) == 32 && !txid.IsEqual(&chainhash.Hash{})
 }
 
 // Bytes encodes the transaction into a byte array.
@@ -377,7 +377,7 @@ func (tx *Tx) Clone() *Tx {
 
 	for i, input := range tx.Inputs {
 		clone.Inputs[i] = &Input{
-			previousTxID:       input.previousTxID,
+			previousTxIDHash:   (*chainhash.Hash)(input.previousTxIDHash.CloneBytes()),
 			PreviousTxSatoshis: input.PreviousTxSatoshis,
 			PreviousTxOutIndex: input.PreviousTxOutIndex,
 			SequenceNumber:     input.SequenceNumber,

@@ -1,10 +1,10 @@
 package bt
 
 import (
-	"encoding/hex"
 	"encoding/json"
 
 	"github.com/libsv/go-bt/v2/bscript"
+	"github.com/libsv/go-bt/v2/chainhash"
 	"github.com/pkg/errors"
 )
 
@@ -68,7 +68,7 @@ func (tx *Tx) UnmarshalJSON(b []byte) error {
 // input struct to add additional fields.
 func (i *Input) MarshalJSON() ([]byte, error) {
 	return json.Marshal(&inputJSON{
-		TxID:            hex.EncodeToString(i.previousTxID),
+		TxID:            i.previousTxIDHash.String(),
 		Vout:            i.PreviousTxOutIndex,
 		UnlockingScript: i.UnlockingScript.String(),
 		Sequence:        i.SequenceNumber,
@@ -81,7 +81,7 @@ func (i *Input) UnmarshalJSON(b []byte) error {
 	if err := json.Unmarshal(b, &ij); err != nil {
 		return err
 	}
-	ptxID, err := hex.DecodeString(ij.TxID)
+	ptxID, err := chainhash.NewHashFromStr(ij.TxID)
 	if err != nil {
 		return err
 	}
@@ -90,7 +90,7 @@ func (i *Input) UnmarshalJSON(b []byte) error {
 		return err
 	}
 	i.UnlockingScript = s
-	i.previousTxID = ptxID
+	i.previousTxIDHash = ptxID
 	i.PreviousTxOutIndex = ij.Vout
 	i.SequenceNumber = ij.Sequence
 	return nil

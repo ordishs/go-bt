@@ -3,11 +3,11 @@ package ord
 import (
 	"bytes"
 	"context"
-	"encoding/hex"
 	"fmt"
 
 	"github.com/libsv/go-bt/v2"
 	"github.com/libsv/go-bt/v2/bscript"
+	"github.com/libsv/go-bt/v2/chainhash"
 	"github.com/libsv/go-bt/v2/sighash"
 	"github.com/pkg/errors"
 )
@@ -78,7 +78,7 @@ func AcceptOrdinalSaleListing2Dummies(ctx context.Context, vla *ValidateListingA
 		if tx.Inputs[j] == nil {
 			return nil, fmt.Errorf("input expected at index %d doesn't exist", j)
 		}
-		if !(bytes.Equal(u.TxID, tx.Inputs[j].PreviousTxID())) {
+		if !bytes.Equal(u.TxIDHash.CloneBytes(), tx.Inputs[j].PreviousTxID()) {
 			return nil, bt.ErrUTXOInputMismatch
 		}
 		if *u.Unlocker == nil {
@@ -128,7 +128,7 @@ func MakeBidToBuy1SatOrdinal2Dummies(ctx context.Context, mba *MakeBid2DArgs) (*
 		return nil, fmt.Errorf(`failed to add inputs: %w`, err)
 	}
 
-	OrdinalTxIDBytes, err := hex.DecodeString(mba.OrdinalTxID)
+	OrdinalTxIDHash, err := chainhash.NewHashFromStr(mba.OrdinalTxID)
 	if err != nil {
 		return nil, err
 	}
@@ -142,7 +142,7 @@ func MakeBidToBuy1SatOrdinal2Dummies(ctx context.Context, mba *MakeBid2DArgs) (*
 			return s
 		}(),
 	}
-	err = emptyOrdInput.PreviousTxIDAdd(OrdinalTxIDBytes)
+	err = emptyOrdInput.PreviousTxIDAdd(OrdinalTxIDHash)
 	if err != nil {
 		return nil, fmt.Errorf(`failed to add ordinal input: %w`, err)
 	}
@@ -190,7 +190,7 @@ func MakeBidToBuy1SatOrdinal2Dummies(ctx context.Context, mba *MakeBid2DArgs) (*
 		if tx.Inputs[j] == nil {
 			return nil, fmt.Errorf("input expected at index %d doesn't exist", j)
 		}
-		if !(bytes.Equal(u.TxID, tx.Inputs[j].PreviousTxID())) {
+		if !bytes.Equal(u.TxIDHash.CloneBytes(), tx.Inputs[j].PreviousTxID()) {
 			return nil, bt.ErrUTXOInputMismatch
 		}
 		if *u.Unlocker == nil {
@@ -233,7 +233,7 @@ func (vba *ValidateBid2DArgs) Validate(pstx *bt.Tx) bool {
 		return false
 	}
 	for i := range vba.PreviousUTXOs {
-		if !bytes.Equal(pstx.Inputs[i].PreviousTxID(), vba.PreviousUTXOs[i].TxID) {
+		if !bytes.Equal(pstx.Inputs[i].PreviousTxID(), vba.PreviousUTXOs[i].TxIDHash.CloneBytes()) {
 			return false
 		}
 		if uint64(pstx.Inputs[i].PreviousTxOutIndex) != uint64(vba.PreviousUTXOs[i].Vout) {
@@ -249,7 +249,7 @@ func (vba *ValidateBid2DArgs) Validate(pstx *bt.Tx) bool {
 
 	// check lou (ListedOrdinalUTXO) matches supplied pstx input index 2
 	pstxOrdinalInput := pstx.Inputs[2]
-	if !bytes.Equal(pstxOrdinalInput.PreviousTxID(), vba.PreviousUTXOs[2].TxID) {
+	if !bytes.Equal(pstxOrdinalInput.PreviousTxID(), vba.PreviousUTXOs[2].TxIDHash.CloneBytes()) {
 		return false
 	}
 	if uint64(pstxOrdinalInput.PreviousTxOutIndex) != uint64(vba.PreviousUTXOs[2].Vout) {

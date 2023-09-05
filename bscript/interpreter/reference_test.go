@@ -9,8 +9,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"math/big"
+	"os"
 	"strconv"
 	"strings"
 	"testing"
@@ -19,6 +19,7 @@ import (
 	"github.com/libsv/go-bt/v2/bscript"
 	"github.com/libsv/go-bt/v2/bscript/interpreter/errs"
 	"github.com/libsv/go-bt/v2/bscript/interpreter/scriptflag"
+	"github.com/libsv/go-bt/v2/chainhash"
 )
 
 var opcodeByName = make(map[string]byte)
@@ -105,8 +106,8 @@ func parseShortForm(script string) (*bscript.Script, error) {
 		} else if len(tok) >= 2 &&
 			tok[0] == '\'' && tok[len(tok)-1] == '\'' {
 			scr.AppendPushData([]byte(tok[1 : len(tok)-1]))
-		} else if opcode, ok := shortFormOps[tok]; ok {
-			scr = append(scr, opcode)
+		} else if code, ok := shortFormOps[tok]; ok {
+			scr = append(scr, code)
 		} else {
 			return nil, fmt.Errorf("bad token %q", tok)
 		}
@@ -310,7 +311,9 @@ func createSpendingTx(sigScript, pkScript *bscript.Script, outputValue int64) *b
 			LockingScript: pkScript,
 		}},
 	}
-	coinbaseTx.Inputs[0].PreviousTxIDAdd(make([]byte, 32))
+
+	empty := chainhash.Hash{}
+	coinbaseTx.Inputs[0].PreviousTxIDAdd(&empty)
 
 	spendingTx := &bt.Tx{
 		Version:  1,
@@ -326,7 +329,7 @@ func createSpendingTx(sigScript, pkScript *bscript.Script, outputValue int64) *b
 			LockingScript: bscript.NewFromBytes([]byte{}),
 		}},
 	}
-	spendingTx.Inputs[0].PreviousTxIDAdd(coinbaseTx.TxIDBytes())
+	spendingTx.Inputs[0].PreviousTxIDAdd(coinbaseTx.TxIDChainHash())
 
 	return spendingTx
 }
@@ -334,7 +337,7 @@ func createSpendingTx(sigScript, pkScript *bscript.Script, outputValue int64) *b
 // TestScripts ensures all of the tests in script_tests.json execute with the
 // expected results as defined in the test data.
 func TestScripts(t *testing.T) {
-	file, err := ioutil.ReadFile("data/script_tests.json")
+	file, err := os.ReadFile("data/script_tests.json")
 	if err != nil {
 		t.Fatalf("TestScripts: %v\n", err)
 	}
@@ -448,14 +451,14 @@ func TestScripts(t *testing.T) {
 
 		// At this point an error was expected so ensure the result of
 		// the execution matches it.
-		success := false
+		successRes := false
 		for _, code := range allowedErrorCodes {
 			if errs.IsErrorCode(err, code) {
-				success = true
+				successRes = true
 				break
 			}
 		}
-		if !success {
+		if !successRes {
 			serr := &errs.Error{}
 			if ok := errors.As(err, serr); ok {
 				t.Errorf("%s: want error codes %v, got %v", name, allowedErrorCodes, serr.ErrorCode)
@@ -487,7 +490,7 @@ type txIOKey struct {
 // TestTxInvalidTests ensures all of the tests in tx_invalid.json fail as
 // expected.
 func TestTxInvalidTests(t *testing.T) {
-	file, err := ioutil.ReadFile("data/tx_invalid.json")
+	file, err := os.ReadFile("data/tx_invalid.json")
 	if err != nil {
 		t.Fatalf("TestTxInvalidTests: %v\n", err)
 	}
@@ -632,7 +635,7 @@ testloop:
 
 // TestTxValidTests ensures all of the tests in tx_valid.json pass as expected.
 func TestTxValidTests(t *testing.T) {
-	file, err := ioutil.ReadFile("data/tx_valid.json")
+	file, err := os.ReadFile("data/tx_valid.json")
 	if err != nil {
 		t.Fatalf("TestTxValidTests: %v\n", err)
 	}
