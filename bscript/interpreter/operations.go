@@ -2005,7 +2005,6 @@ func opcodeCheckSig(op *ParsedOpcode, t *thread) error {
 		if sigBytesDer == nil {
 			// signature is not in DER format, so we must parse it and set the bytes
 			signature, err = bec.ParseSignature(sigBytes, bec.S256())
-			sigBytesDer = signature.Serialise()
 			if err != nil {
 				t.dstack.PushBool(false)
 				return nil //nolint:nilerr // only need a false push in this case
@@ -2025,6 +2024,10 @@ func opcodeCheckSig(op *ParsedOpcode, t *thread) error {
 			signature, err = bec.ParseDERSignature(sigBytes, bec.S256())
 		} else {
 			signature, err = bec.ParseSignature(sigBytes, bec.S256())
+		}
+		if err != nil {
+			t.dstack.PushBool(false)
+			return nil //nolint:nilerr // only need a false push in this case
 		}
 
 		ok = signature.Verify(hash, pubKey)
