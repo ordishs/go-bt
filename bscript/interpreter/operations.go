@@ -2021,9 +2021,9 @@ func opcodeCheckSig(op *ParsedOpcode, t *thread) error {
 		}
 
 		if t.hasAny(scriptflag.VerifyStrictEncoding, scriptflag.VerifyDERSignatures) {
-			signature, err = bec.ParseDERSignature(sigBytes, bec.S256())
+			signature, _ = bec.ParseDERSignature(sigBytes, bec.S256())
 		} else {
-			signature, err = bec.ParseSignature(sigBytes, bec.S256())
+			signature, _ = bec.ParseSignature(sigBytes, bec.S256())
 		}
 		if err != nil {
 			t.dstack.PushBool(false)
