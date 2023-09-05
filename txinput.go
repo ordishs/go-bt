@@ -39,7 +39,7 @@ func (tx *Tx) addInput(input *Input) {
 // that match a specific public key to your transaction.
 func (tx *Tx) AddP2PKHInputsFromTx(pvsTx *Tx, matchPK []byte) error {
 	// Given that the prevTxID never changes, calculate it once up front.
-	prevTxIDBytes := pvsTx.TxIDBytes()
+	prevTxIDBytes := pvsTx.TxIDChainHash().CloneBytes()
 	for i, utxo := range pvsTx.Outputs {
 		utxoPkHASH160, err := utxo.LockingScript.PublicKeyHash()
 		if err != nil {

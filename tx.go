@@ -8,8 +8,6 @@ import (
 	"io"
 	"log"
 
-	"github.com/libsv/go-bk/crypto"
-
 	"github.com/libsv/go-bt/v2/bscript"
 	"github.com/libsv/go-bt/v2/chainhash"
 )
@@ -297,16 +295,10 @@ func (tx *Tx) IsExtended() bool {
 	return true
 }
 
-// TxIDBytes returns the transaction ID of the transaction as bytes
-// (which is also the transaction hash).
-func (tx *Tx) TxIDBytes() []byte {
-	return ReverseBytes(crypto.Sha256d(tx.Bytes()))
-}
-
 // TxID returns the transaction ID of the transaction
 // (which is also the transaction hash).
 func (tx *Tx) TxID() string {
-	return hex.EncodeToString(ReverseBytes(crypto.Sha256d(tx.Bytes())))
+	return tx.TxIDChainHash().String()
 }
 
 func (tx *Tx) TxIDChainHash() *chainhash.Hash {
