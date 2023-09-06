@@ -315,7 +315,7 @@ func (tx *Tx) String() string {
 //
 // A txid should be of 32 bytes length.
 func IsValidTxID(txid *chainhash.Hash) bool {
-	return txid != nil && len(txid) == 32 && !txid.IsEqual(&chainhash.Hash{})
+	return txid != nil && len(txid) == 32
 }
 
 // Bytes encodes the transaction into a byte array.

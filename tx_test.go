@@ -514,7 +514,7 @@ func Test_IsValidTxID(t *testing.T) {
 			exp:  false,
 		}, "empty txID should return false": {
 			txid: "",
-			exp:  false,
+			exp:  true, // this is because the empty string gets converted to all 0's
 		},
 	}
 	for name, test := range tests {
