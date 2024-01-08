@@ -8,6 +8,7 @@ import (
 	"github.com/libsv/go-bt"
 	"github.com/libsv/go-bt/bscript"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const outputHexStr = "8a08ac4a000000001976a9148bf10d323ac757268eb715e613cb8e8e1d1793aa88ac00000000"
@@ -17,44 +18,44 @@ func TestNewOutputFromBytes(t *testing.T) {
 
 	t.Run("invalid output, too short", func(t *testing.T) {
 		o, s, err := bt.NewOutputFromBytes([]byte(""))
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Nil(t, o)
 		assert.Equal(t, 0, s)
 	})
 
 	t.Run("invalid output, too short + script", func(t *testing.T) {
 		o, s, err := bt.NewOutputFromBytes([]byte("0000000000000"))
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Nil(t, o)
 		assert.Equal(t, 0, s)
 	})
 
 	t.Run("valid output", func(t *testing.T) {
 		bytes, err := hex.DecodeString(outputHexStr)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		var o *bt.Output
 		var s int
 		o, s, err = bt.NewOutputFromBytes(bytes)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, o)
 
 		assert.Equal(t, 34, s)
 		assert.Equal(t, uint64(1252788362), o.Satoshis)
-		assert.Equal(t, 25, len(*o.LockingScript))
+		assert.Len(t, *o.LockingScript, 25)
 		assert.Equal(t, "76a9148bf10d323ac757268eb715e613cb8e8e1d1793aa88ac", o.GetLockingScriptHexString())
 	})
 }
 
-func TestOutput_String(t *testing.T) {
+func TestOutputString(t *testing.T) {
 	t.Run("compare string output", func(t *testing.T) {
 
 		bytes, err := hex.DecodeString(outputHexStr)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		var o *bt.Output
 		o, _, err = bt.NewOutputFromBytes(bytes)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, o)
 
 		assert.Equal(t, "value:     1252788362\nscriptLen: 25\nscript:    &76a9148bf10d323ac757268eb715e613cb8e8e1d1793aa88ac\n", o.String())
@@ -69,7 +70,7 @@ func TestNewP2PKHOutputFromPubKeyHashStr(t *testing.T) {
 			"",
 			uint64(5000),
 		)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, o)
 		assert.Equal(t,
 			"76a91488ac",
@@ -82,7 +83,7 @@ func TestNewP2PKHOutputFromPubKeyHashStr(t *testing.T) {
 			"0",
 			uint64(5000),
 		)
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Nil(t, o)
 	})
 
@@ -92,7 +93,7 @@ func TestNewP2PKHOutputFromPubKeyHashStr(t *testing.T) {
 			"8fe80c75c9560e8b56ed64ea3c26e18d2c52211b",
 			uint64(5000),
 		)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, o)
 		assert.Equal(t,
 			"76a9148fe80c75c9560e8b56ed64ea3c26e18d2c52211b88ac",
@@ -106,13 +107,13 @@ func TestNewHashPuzzleOutput(t *testing.T) {
 
 	t.Run("invalid public key", func(t *testing.T) {
 		o, err := bt.NewHashPuzzleOutput("", "0", uint64(5000))
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Nil(t, o)
 	})
 
 	t.Run("missing secret and public key", func(t *testing.T) {
 		o, err := bt.NewHashPuzzleOutput("", "", uint64(5000))
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t,
 			"a914b472a266d0bd89c13706a4132ccfb16f7c3b9fcb8876a90088ac",
 			o.GetLockingScriptHexString(),
@@ -121,12 +122,12 @@ func TestNewHashPuzzleOutput(t *testing.T) {
 
 	t.Run("valid puzzle output", func(t *testing.T) {
 		addr, err := bscript.NewAddressFromString("myFhJggmsaA2S8Qe6ZQDEcVCwC4wLkvC4e")
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, addr)
 
 		var o *bt.Output
 		o, err = bt.NewHashPuzzleOutput("secret1", addr.PublicKeyHash, uint64(5000))
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, o)
 		assert.Equal(t,
 			"a914d3f9e3d971764be5838307b175ee4e08ba427b908876a914c28f832c3d539933e0c719297340b34eee0f4c3488ac",
@@ -143,7 +144,7 @@ func TestNewOpReturnOutput(t *testing.T) {
 		"continue to write the Chronicle of everything. Thank you and goodnight from team SV."
 	dataBytes := []byte(data)
 	o, err := bt.NewOpReturnOutput(dataBytes)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, o)
 
 	script := o.GetLockingScriptHexString()
@@ -158,7 +159,7 @@ func TestNewOpReturnPartsOutput(t *testing.T) {
 
 	dataBytes := [][]byte{[]byte("hi"), []byte("how"), []byte("are"), []byte("you")}
 	o, err := bt.NewOpReturnPartsOutput(dataBytes)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, o)
 
 	assert.Equal(t, "006a02686903686f770361726503796f75", o.GetLockingScriptHexString())

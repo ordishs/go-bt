@@ -86,7 +86,7 @@ func TestVarInt(t *testing.T) {
 
 	for _, varIntTest := range varIntTests {
 		t.Run(varIntTest.testName, func(t *testing.T) {
-			assert.Equal(t, varIntTest.expectedLen, len(bt.VarInt(varIntTest.input)))
+			assert.Len(t, bt.VarInt(varIntTest.input), varIntTest.expectedLen)
 		})
 	}
 }

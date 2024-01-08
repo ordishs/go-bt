@@ -6,6 +6,7 @@ import (
 
 	"github.com/libsv/go-bt/bscript"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestEncodeBIP276(t *testing.T) {
@@ -105,7 +106,7 @@ func TestDecodeBIP276(t *testing.T) {
 
 	t.Run("valid decode", func(t *testing.T) {
 		prefix, network, version, data, err := bscript.DecodeBIP276("bitcoin-script:010166616b65207363726970746f0cd86a")
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, `"bitcoin-script"`, fmt.Sprintf("%q", prefix))
 		assert.Equal(t, 1, network)
 		assert.Equal(t, 1, version)
@@ -114,12 +115,12 @@ func TestDecodeBIP276(t *testing.T) {
 
 	t.Run("invalid decode", func(t *testing.T) {
 		_, _, _, _, err := bscript.DecodeBIP276("bitcoin-script:01")
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 
 	t.Run("valid format, bad checksum", func(t *testing.T) {
 		prefix, network, version, data, err := bscript.DecodeBIP276("bitcoin-script:010166616b65207363726970746f0cd8")
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Equal(t, `"bitcoin-script"`, fmt.Sprintf("%q", prefix))
 		assert.Equal(t, 1, network)
 		assert.Equal(t, 1, version)
