@@ -3,6 +3,7 @@ package bt_test
 import (
 	"context"
 	"encoding/json"
+	"github.com/stretchr/testify/require"
 	"testing"
 
 	"github.com/libsv/go-bk/wif"
@@ -209,11 +210,15 @@ func TestTxJSON_Node_MarshallJSON(t *testing.T) {
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			bb, err := json.MarshalIndent(test.tx.NodeJSON(), "", "\t")
+			// decouple extended info from tx
+			testTx, err := bt.NewTxFromBytes(test.tx.Bytes())
+			require.NoError(t, err)
+			bb, err := json.MarshalIndent(testTx.NodeJSON(), "", "\t")
 			assert.NoError(t, err)
 			assert.Equal(t, test.expJSON, string(bb))
 		})
 	}
+	// TODO test with extended info
 }
 
 func TestTxJSON_Node_UnmarshalJSON(t *testing.T) {
@@ -544,11 +549,19 @@ func TestTxsJSON_Node_MarshallJSON(t *testing.T) {
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			bb, err := json.MarshalIndent(test.tx.NodeJSON(), "", "\t")
+			// decouple extended info from tx
+			testTxs := make(bt.Txs, 0)
+			for _, tx := range test.tx {
+				testTx, err := bt.NewTxFromBytes(tx.Bytes())
+				require.NoError(t, err)
+				testTxs = append(testTxs, testTx)
+			}
+			bb, err := json.MarshalIndent(testTxs.NodeJSON(), "", "\t")
 			assert.NoError(t, err)
 			assert.Equal(t, test.expJSON, string(bb))
 		})
 	}
+	// TODO test with extended info
 }
 
 func TestTxsJSON_Node_UnmarshalJSON(t *testing.T) {

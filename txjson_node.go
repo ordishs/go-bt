@@ -33,9 +33,16 @@ type nodeInputJSON struct {
 		Asm string `json:"asm"`
 		Hex string `json:"hex"`
 	} `json:"scriptSig,omitempty"`
-	TxID     string `json:"txid"`
-	Vout     uint32 `json:"vout"`
-	Sequence uint32 `json:"sequence"`
+	TxID               string `json:"txid"`
+	Vout               uint32 `json:"vout"`
+	Sequence           uint32 `json:"sequence"`
+	PreviousTxSatoshis uint64 `json:"previousTxSatoshis,omitempty"`
+	PreviousTxScript   *struct {
+		Asm     string `json:"asm"`
+		Hex     string `json:"hex"`
+		ReqSigs int    `json:"reqSigs,omitempty"`
+		Type    string `json:"type"`
+	} `json:"previousTxScript,omitempty"`
 }
 
 type nodeOutputJSON struct {
@@ -198,6 +205,29 @@ func (i *nodeInputJSON) fromInput(input *Input) error {
 	i.Vout = input.PreviousTxOutIndex
 	i.Sequence = input.SequenceNumber
 	i.TxID = input.PreviousTxIDStr()
+
+	if input.PreviousTxSatoshis != 0 {
+		i.PreviousTxSatoshis = input.PreviousTxSatoshis
+	}
+
+	if input.PreviousTxScript != nil {
+		asm, err := input.PreviousTxScript.ToASM()
+		if err != nil {
+			return err
+		}
+		i.PreviousTxScript = &struct {
+			Asm     string `json:"asm"`
+			Hex     string `json:"hex"`
+			ReqSigs int    `json:"reqSigs,omitempty"`
+			Type    string `json:"type"`
+		}{
+			Asm:     asm,
+			Hex:     input.PreviousTxScript.String(),
+			ReqSigs: 1,
+			Type:    input.PreviousTxScript.ScriptType(),
+		}
+
+	}
 
 	return nil
 }
