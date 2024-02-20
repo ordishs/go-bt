@@ -3,6 +3,7 @@ package bt_test
 import (
 	"context"
 	"encoding/json"
+	"github.com/stretchr/testify/require"
 	"testing"
 
 	"github.com/libsv/go-bk/wif"
@@ -176,12 +177,15 @@ func TestTx_MarshallJSON(t *testing.T) {
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			bb, err := json.MarshalIndent(test.tx, "", "\t")
+			// decouple extended info for this test
+			testTx, err := bt.NewTxFromBytes(test.tx.Bytes())
+			require.NoError(t, err)
+			bb, err := json.MarshalIndent(testTx, "", "\t")
 			assert.NoError(t, err)
-
 			assert.Equal(t, test.expJSON, string(bb))
 		})
 	}
+	// TODO add tests for extended format
 }
 
 func TestTx_UnmarshalJSON(t *testing.T) {

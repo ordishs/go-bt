@@ -18,10 +18,12 @@ type txJSON struct {
 }
 
 type inputJSON struct {
-	UnlockingScript string `json:"unlockingScript"`
-	TxID            string `json:"txid"`
-	Vout            uint32 `json:"vout"`
-	Sequence        uint32 `json:"sequence"`
+	UnlockingScript    string `json:"unlockingScript"`
+	TxID               string `json:"txid"`
+	Vout               uint32 `json:"vout"`
+	Sequence           uint32 `json:"sequence"`
+	PreviousTxSatoshis uint64 `json:"previousTxSatoshis,omitempty"`
+	PreviousTxScript   string `json:"previousTxScript,omitempty"`
 }
 
 type outputJSON struct {
@@ -67,12 +69,19 @@ func (tx *Tx) UnmarshalJSON(b []byte) error {
 // MarshalJSON will convert an input to json, expanding upon the
 // input struct to add additional fields.
 func (i *Input) MarshalJSON() ([]byte, error) {
-	return json.Marshal(&inputJSON{
-		TxID:            i.previousTxIDHash.String(),
-		Vout:            i.PreviousTxOutIndex,
-		UnlockingScript: i.UnlockingScript.String(),
-		Sequence:        i.SequenceNumber,
-	})
+	ij := &inputJSON{
+		TxID:               i.previousTxIDHash.String(),
+		Vout:               i.PreviousTxOutIndex,
+		UnlockingScript:    i.UnlockingScript.String(),
+		Sequence:           i.SequenceNumber,
+		PreviousTxSatoshis: i.PreviousTxSatoshis,
+	}
+
+	if i.PreviousTxScript != nil {
+		ij.PreviousTxScript = i.PreviousTxScript.String()
+	}
+
+	return json.Marshal(ij)
 }
 
 // UnmarshalJSON will convert a JSON input to an input.
@@ -93,6 +102,19 @@ func (i *Input) UnmarshalJSON(b []byte) error {
 	i.previousTxIDHash = ptxID
 	i.PreviousTxOutIndex = ij.Vout
 	i.SequenceNumber = ij.Sequence
+
+	if ij.PreviousTxSatoshis != 0 {
+		i.PreviousTxSatoshis = ij.PreviousTxSatoshis
+	}
+
+	if ij.PreviousTxScript != "" {
+		s, err := bscript.NewFromHexString(ij.PreviousTxScript)
+		if err != nil {
+			return err
+		}
+		i.PreviousTxScript = s
+	}
+
 	return nil
 }
 
