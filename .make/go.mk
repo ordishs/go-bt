@@ -42,7 +42,7 @@ install-go: ## Install the application (Using Native Go)
 
 lint: ## Run the golangci-lint application (install if not found)
 	@echo "downloading golangci-lint..."
-	@curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- v1.52.1
+	@curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- v1.55.2
 	@echo "running golangci-lint..."
 	@GOGC=20 ./bin/golangci-lint run
 

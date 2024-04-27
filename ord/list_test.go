@@ -12,6 +12,7 @@ import (
 	"github.com/libsv/go-bt/v2/ord"
 	"github.com/libsv/go-bt/v2/unlocker"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestOfferToSellPSBTNoErrors(t *testing.T) {
@@ -49,7 +50,7 @@ func TestOfferToSellPSBTNoErrors(t *testing.T) {
 	})
 
 	t.Run("no errors creating PSBT to make an offer to sell ordinal", func(t *testing.T) {
-		assert.NoError(t, CreateListingError)
+		require.NoError(t, CreateListingError)
 	})
 
 	t.Run("validate PSBT to make an offer to sell ordinal", func(t *testing.T) {
@@ -98,7 +99,7 @@ func TestOfferToSellPSBTNoErrors(t *testing.T) {
 				ChangeScript:              changeS,
 				FQ:                        bt.NewFeeQuote(),
 			})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	})
 
 	// TODO: are 2 dummies useful or to be removed?
@@ -137,7 +138,7 @@ func TestOfferToSellPSBTNoErrors(t *testing.T) {
 				ChangeScript:              changeS,
 				FQ:                        bt.NewFeeQuote(),
 			})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	})
 	//
 }

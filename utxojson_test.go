@@ -8,6 +8,7 @@ import (
 	"github.com/libsv/go-bt/v2/bscript"
 	"github.com/libsv/go-bt/v2/chainhash"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestUTXO_JSON(t *testing.T) {
@@ -17,9 +18,9 @@ func TestUTXO_JSON(t *testing.T) {
 		"standard utxo should marshal and unmarshal correctly": {
 			utxo: func() *bt.UTXO {
 				txID, err := chainhash.NewHashFromStr("31ad4b5ef1d0d48340e063087cbfa6a3f3dea3cd5d34c983e0028c18daf3d2a7")
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				script, err := bscript.NewFromHexString("2102076ad7c107f82ae973fbdaa1d84532c8d69e3838bcbee1570efe0fa30b3cb25bac")
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				return &bt.UTXO{
 					TxIDHash:      txID,
 					LockingScript: script,
@@ -33,13 +34,13 @@ func TestUTXO_JSON(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			bb, err := json.Marshal(test.utxo)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			var utxo *bt.UTXO
-			assert.NoError(t, json.Unmarshal(bb, &utxo))
+			require.NoError(t, json.Unmarshal(bb, &utxo))
 
 			bb2, err := json.Marshal(utxo)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, bb, bb2)
 		})
 	}
@@ -53,9 +54,9 @@ func TestUTXO_MarshalJSON(t *testing.T) {
 		"standard utxo should marshal correctly": {
 			utxo: func() *bt.UTXO {
 				txID, err := chainhash.NewHashFromStr("31ad4b5ef1d0d48340e063087cbfa6a3f3dea3cd5d34c983e0028c18daf3d2a7")
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				script, err := bscript.NewFromHexString("2102076ad7c107f82ae973fbdaa1d84532c8d69e3838bcbee1570efe0fa30b3cb25bac")
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				return &bt.UTXO{
 					TxIDHash:      txID,
 					LockingScript: script,
@@ -74,7 +75,7 @@ func TestUTXO_MarshalJSON(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			bb, err := json.MarshalIndent(test.utxo, "", "    ")
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			assert.Equal(t, test.exp, string(bb))
 		})
@@ -88,9 +89,9 @@ func TestUTXO_Node_JSON(t *testing.T) {
 		"node utxo should marshal and unmarshal correctly": {
 			utxo: func() *bt.UTXO {
 				txID, err := chainhash.NewHashFromStr("31ad4b5ef1d0d48340e063087cbfa6a3f3dea3cd5d34c983e0028c18daf3d2a7")
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				script, err := bscript.NewFromHexString("2102076ad7c107f82ae973fbdaa1d84532c8d69e3838bcbee1570efe0fa30b3cb25bac")
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				return &bt.UTXO{
 					TxIDHash:      txID,
 					LockingScript: script,
@@ -104,13 +105,13 @@ func TestUTXO_Node_JSON(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			bb, err := json.Marshal(test.utxo.NodeJSON())
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			utxo := &bt.UTXO{}
-			assert.NoError(t, json.Unmarshal(bb, utxo.NodeJSON()))
+			require.NoError(t, json.Unmarshal(bb, utxo.NodeJSON()))
 
 			bb2, err := json.Marshal(utxo.NodeJSON())
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, bb, bb2)
 		})
 	}
@@ -124,9 +125,9 @@ func TestUTXO_Node_MarshalJSON(t *testing.T) {
 		"standard utxo should marshal correctly": {
 			utxo: func() *bt.UTXO {
 				txID, err := chainhash.NewHashFromStr("31ad4b5ef1d0d48340e063087cbfa6a3f3dea3cd5d34c983e0028c18daf3d2a7")
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				script, err := bscript.NewFromHexString("2102076ad7c107f82ae973fbdaa1d84532c8d69e3838bcbee1570efe0fa30b3cb25bac")
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				return &bt.UTXO{
 					TxIDHash:      txID,
 					LockingScript: script,
@@ -145,7 +146,7 @@ func TestUTXO_Node_MarshalJSON(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			bb, err := json.MarshalIndent(test.utxo.NodeJSON(), "", "    ")
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			assert.Equal(t, test.exp, string(bb))
 		})
@@ -166,9 +167,9 @@ func TestUTXO_Node_UnmarshalJSON(t *testing.T) {
 }`,
 			expUTXO: func() *bt.UTXO {
 				txID, err := chainhash.NewHashFromStr("31ad4b5ef1d0d48340e063087cbfa6a3f3dea3cd5d34c983e0028c18daf3d2a7")
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				script, err := bscript.NewFromHexString("2102076ad7c107f82ae973fbdaa1d84532c8d69e3838bcbee1570efe0fa30b3cb25bac")
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				return &bt.UTXO{
 					TxIDHash:      txID,
 					LockingScript: script,
@@ -182,7 +183,7 @@ func TestUTXO_Node_UnmarshalJSON(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			var utxo bt.UTXO
-			assert.NoError(t, json.Unmarshal([]byte(test.utxoJSON), utxo.NodeJSON()))
+			require.NoError(t, json.Unmarshal([]byte(test.utxoJSON), utxo.NodeJSON()))
 
 			assert.Equal(t, *test.expUTXO, utxo)
 		})

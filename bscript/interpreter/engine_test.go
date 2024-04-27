@@ -13,7 +13,6 @@ import (
 	"github.com/libsv/go-bt/v2/bscript/interpreter/errs"
 	"github.com/libsv/go-bt/v2/bscript/interpreter/scriptflag"
 	"github.com/libsv/go-bt/v2/sighash"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -152,10 +151,10 @@ func TestValidateParams(t *testing.T) {
 				tx: func() *bt.Tx {
 					tx := bt.NewTx()
 					err := tx.From("ae81577c1a2434929a1224cf19aa63e167d88029965e2ca6de24defff014d031", 0, "76a91454807ccc44c0eec0b0e187b3ce0e137e9c6cd65d88ac", 0)
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					uscript, err := bscript.NewFromHexString("483045022100a4d9da733aeb29f9ba94dcaa578e71662cf29dd9742ce4b022c098211f4fdb06022041d24db4eda239fa15a12cf91229f6c352adab3c1c10091fc2aa517fe0f487c5412102454c535854802e5eaeaf5cbecd20e0aa508486063b71194dfde34744f19f1a5d")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					tx.Inputs[0].UnlockingScript = uscript
 
@@ -163,7 +162,7 @@ func TestValidateParams(t *testing.T) {
 				}(),
 				previousTxOut: func() *bt.Output {
 					cbLockingScript, err := bscript.NewFromHexString("76a91454807ccc44c0eec0b0e187b3ce0e137e9c6cd65d88ac")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					return &bt.Output{LockingScript: cbLockingScript, Satoshis: 0}
 				}(),
@@ -174,10 +173,10 @@ func TestValidateParams(t *testing.T) {
 				tx: func() *bt.Tx {
 					tx := bt.NewTx()
 					err := tx.From("ae81577c1a2434929a1224cf19aa63e167d88029965e2ca6de24defff014d031", 0, "52529387", 0)
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					txUnlockingScript, err := bscript.NewFromASM("OP_4")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					tx.Inputs[0].UnlockingScript = txUnlockingScript
 
@@ -185,7 +184,7 @@ func TestValidateParams(t *testing.T) {
 				}(),
 				previousTxOut: func() *bt.Output {
 					cbLockingScript, err := bscript.NewFromASM("OP_2 OP_2 OP_ADD OP_EQUAL")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					return &bt.Output{LockingScript: cbLockingScript, Satoshis: 0}
 				}(),
@@ -195,12 +194,12 @@ func TestValidateParams(t *testing.T) {
 			params: execOpts{
 				lockingScript: func() *bscript.Script {
 					script, err := bscript.NewFromHexString("52529387")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 					return script
 				}(),
 				unlockingScript: func() *bscript.Script {
 					script, err := bscript.NewFromHexString("54")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 					return script
 				}(),
 			},
@@ -209,21 +208,21 @@ func TestValidateParams(t *testing.T) {
 			params: execOpts{
 				lockingScript: func() *bscript.Script {
 					script, err := bscript.NewFromHexString("76a91454807ccc44c0eec0b0e187b3ce0e137e9c6cd65d88ac")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 					return script
 				}(),
 				unlockingScript: func() *bscript.Script {
 					script, err := bscript.NewFromHexString("483045022100a4d9da733aeb29f9ba94dcaa578e71662cf29dd9742ce4b022c098211f4fdb06022041d24db4eda239fa15a12cf91229f6c352adab3c1c10091fc2aa517fe0f487c5412102454c535854802e5eaeaf5cbecd20e0aa508486063b71194dfde34744f19f1a5d")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 					return script
 				}(),
 				tx: func() *bt.Tx {
 					tx := bt.NewTx()
 					err := tx.From("ae81577c1a2434929a1224cf19aa63e167d88029965e2ca6de24defff014d031", 0, "76a91454807ccc44c0eec0b0e187b3ce0e137e9c6cd65d88ac", 0)
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					uscript, err := bscript.NewFromHexString("483045022100a4d9da733aeb29f9ba94dcaa578e71662cf29dd9742ce4b022c098211f4fdb06022041d24db4eda239fa15a12cf91229f6c352adab3c1c10091fc2aa517fe0f487c5412102454c535854802e5eaeaf5cbecd20e0aa508486063b71194dfde34744f19f1a5d")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					tx.Inputs[0].UnlockingScript = uscript
 
@@ -231,7 +230,7 @@ func TestValidateParams(t *testing.T) {
 				}(),
 				previousTxOut: func() *bt.Output {
 					script, err := bscript.NewFromHexString("76a91454807ccc44c0eec0b0e187b3ce0e137e9c6cd65d88ac")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					return &bt.Output{LockingScript: script, Satoshis: 0}
 				}(),
@@ -241,16 +240,16 @@ func TestValidateParams(t *testing.T) {
 			params: execOpts{
 				unlockingScript: func() *bscript.Script {
 					script, err := bscript.NewFromHexString("483045022100a4d9da733aeb29f9ba94dcaa578e71662cf29dd9742ce4b022c098211f4fdb06022041d24db4eda239fa15a12cf91229f6c352adab3c1c10091fc2aa517fe0f487c5412102454c535854802e5eaeaf5cbecd20e0aa508486063b71194dfde34744f19f1a5d")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 					return script
 				}(),
 				tx: func() *bt.Tx {
 					tx := bt.NewTx()
 					err := tx.From("ae81577c1a2434929a1224cf19aa63e167d88029965e2ca6de24defff014d031", 0, "76a91454807ccc44c0eec0b0e187b3ce0e137e9c6cd65d88ac", 0)
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					uscript, err := bscript.NewFromHexString("483045022100a4d9da733aeb29f9ba94dcaa578e71662cf29dd9742ce4b022c098211f4fdb06022041d24db4eda239fa15a12cf91229f6c352adab3c1c10091fc2aa517fe0f487c5412102454c535854802e5eaeaf5cbecd20e0aa508486063b71194dfde34744f19f1a5d")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					tx.Inputs[0].UnlockingScript = uscript
 
@@ -263,12 +262,12 @@ func TestValidateParams(t *testing.T) {
 			params: execOpts{
 				lockingScript: func() *bscript.Script {
 					script, err := bscript.NewFromHexString("76a91454807ccc44c0eec0b0e187b3ce0e137e9c6cd65d88ac")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 					return script
 				}(),
 				previousTxOut: func() *bt.Output {
 					script, err := bscript.NewFromHexString("76a91454807ccc44c0eec0b0e187b3ce0e137e9c6cd65d88ac")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					return &bt.Output{LockingScript: script, Satoshis: 0}
 				}(),
@@ -279,12 +278,12 @@ func TestValidateParams(t *testing.T) {
 			params: execOpts{
 				lockingScript: func() *bscript.Script {
 					script, err := bscript.NewFromHexString("76a91454807ccc44c0eec0b0e187b3ce0e137e9c6cd65d88ac")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 					return script
 				}(),
 				unlockingScript: func() *bscript.Script {
 					script, err := bscript.NewFromHexString("483045022100a4d9da733aeb29f9ba94dcaa578e71662cf29dd9742ce4b022c098211f4fdb06022041d24db4eda239fa15a12cf91229f6c352adab3c1c10091fc2aa517fe0f487c5412102454c535854802e5eaeaf5cbecd20e0aa508486063b71194dfde34744f19f1a5d")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 					return script
 				}(),
 			},
@@ -294,21 +293,21 @@ func TestValidateParams(t *testing.T) {
 			params: execOpts{
 				lockingScript: func() *bscript.Script {
 					script, err := bscript.NewFromHexString("52529387")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 					return script
 				}(),
 				unlockingScript: func() *bscript.Script {
 					script, err := bscript.NewFromHexString("483045022100a4d9da733aeb29f9ba94dcaa578e71662cf29dd9742ce4b022c098211f4fdb06022041d24db4eda239fa15a12cf91229f6c352adab3c1c10091fc2aa517fe0f487c5412102454c535854802e5eaeaf5cbecd20e0aa508486063b71194dfde34744f19f1a5d")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 					return script
 				}(),
 				tx: func() *bt.Tx {
 					tx := bt.NewTx()
 					err := tx.From("ae81577c1a2434929a1224cf19aa63e167d88029965e2ca6de24defff014d031", 0, "76a91454807ccc44c0eec0b0e187b3ce0e137e9c6cd65d88ac", 0)
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					uscript, err := bscript.NewFromHexString("483045022100a4d9da733aeb29f9ba94dcaa578e71662cf29dd9742ce4b022c098211f4fdb06022041d24db4eda239fa15a12cf91229f6c352adab3c1c10091fc2aa517fe0f487c5412102454c535854802e5eaeaf5cbecd20e0aa508486063b71194dfde34744f19f1a5d")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					tx.Inputs[0].UnlockingScript = uscript
 
@@ -316,7 +315,7 @@ func TestValidateParams(t *testing.T) {
 				}(),
 				previousTxOut: func() *bt.Output {
 					script, err := bscript.NewFromHexString("76a91454807ccc44c0eec0b0e187b3ce0e137e9c6cd65d88ac")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					return &bt.Output{LockingScript: script, Satoshis: 0}
 				}(),
@@ -327,21 +326,21 @@ func TestValidateParams(t *testing.T) {
 			params: execOpts{
 				lockingScript: func() *bscript.Script {
 					script, err := bscript.NewFromHexString("76a91454807ccc44c0eec0b0e187b3ce0e137e9c6cd65d88ac")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 					return script
 				}(),
 				unlockingScript: func() *bscript.Script {
 					script, err := bscript.NewFromHexString("84")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 					return script
 				}(),
 				tx: func() *bt.Tx {
 					tx := bt.NewTx()
 					err := tx.From("ae81577c1a2434929a1224cf19aa63e167d88029965e2ca6de24defff014d031", 0, "76a91454807ccc44c0eec0b0e187b3ce0e137e9c6cd65d88ac", 0)
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					uscript, err := bscript.NewFromHexString("483045022100a4d9da733aeb29f9ba94dcaa578e71662cf29dd9742ce4b022c098211f4fdb06022041d24db4eda239fa15a12cf91229f6c352adab3c1c10091fc2aa517fe0f487c5412102454c535854802e5eaeaf5cbecd20e0aa508486063b71194dfde34744f19f1a5d")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					tx.Inputs[0].UnlockingScript = uscript
 
@@ -349,7 +348,7 @@ func TestValidateParams(t *testing.T) {
 				}(),
 				previousTxOut: func() *bt.Output {
 					script, err := bscript.NewFromHexString("76a91454807ccc44c0eec0b0e187b3ce0e137e9c6cd65d88ac")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					return &bt.Output{LockingScript: script, Satoshis: 0}
 				}(),
@@ -361,10 +360,10 @@ func TestValidateParams(t *testing.T) {
 				tx: func() *bt.Tx {
 					tx := bt.NewTx()
 					err := tx.From("ae81577c1a2434929a1224cf19aa63e167d88029965e2ca6de24defff014d031", 0, "76a91454807ccc44c0eec0b0e187b3ce0e137e9c6cd65d88ac", 0)
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					uscript, err := bscript.NewFromHexString("483045022100a4d9da733aeb29f9ba94dcaa578e71662cf29dd9742ce4b022c098211f4fdb06022041d24db4eda239fa15a12cf91229f6c352adab3c1c10091fc2aa517fe0f487c5412102454c535854802e5eaeaf5cbecd20e0aa508486063b71194dfde34744f19f1a5d")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					tx.Inputs[0].UnlockingScript = uscript
 
@@ -372,7 +371,7 @@ func TestValidateParams(t *testing.T) {
 				}(),
 				previousTxOut: func() *bt.Output {
 					cbLockingScript, err := bscript.NewFromHexString("76a91454807ccc44c0eec0b0e187b3ce0e137e9c6cd65d88ac")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					return &bt.Output{LockingScript: cbLockingScript, Satoshis: 0}
 				}(),
@@ -387,10 +386,10 @@ func TestValidateParams(t *testing.T) {
 			_, err := createThread(&test.params)
 
 			if test.expErr != nil {
-				assert.Error(t, err)
-				assert.EqualError(t, err, test.expErr.Error())
+				require.Error(t, err)
+				require.EqualError(t, err, test.expErr.Error())
 			} else {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 			}
 		})
 	}
@@ -511,6 +510,8 @@ func TestCheckPubKeyEncoding(t *testing.T) {
 
 // TestCheckSignatureEncoding ensures the internal checkSignatureEncoding
 // function works as expected.
+//
+//nolint:goconst // reason: using constants would reduce readability in this specific case
 func TestCheckSignatureEncoding(t *testing.T) {
 	t.Parallel()
 
@@ -851,16 +852,16 @@ func TestEngine_WithState(t *testing.T) {
 				SavedFirstStack:      [][]byte{},
 				Scripts: func() []ParsedScript {
 					lscript, err := bscript.NewFromHexString("5253958852529387")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 					uscript, err := bscript.NewFromHexString("5456")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					var parser DefaultOpcodeParser
 					parsedLScript, err := parser.Parse(lscript)
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					parsedUScript, err := parser.Parse(uscript)
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					return []ParsedScript{parsedUScript, parsedLScript}
 				}(),
@@ -890,16 +891,16 @@ func TestEngine_WithState(t *testing.T) {
 				SavedFirstStack:      [][]byte{},
 				Scripts: func() []ParsedScript {
 					lscript, err := bscript.NewFromHexString("5253958852529387")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 					uscript, err := bscript.NewFromHexString("5456")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					var parser DefaultOpcodeParser
 					parsedLScript, err := parser.Parse(lscript)
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					parsedUScript, err := parser.Parse(uscript)
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					return []ParsedScript{parsedUScript, parsedLScript}
 				}(),
@@ -916,11 +917,11 @@ func TestEngine_WithState(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			lscript, err := bscript.NewFromHexString(test.lscript)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			uscript, err := bscript.NewFromHexString(test.uscript)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
-			assert.NoError(t, NewEngine().Execute(
+			require.NoError(t, NewEngine().Execute(
 				WithScripts(lscript, uscript),
 				WithForkID(),
 				WithAfterGenesis(),

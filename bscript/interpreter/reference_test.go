@@ -489,6 +489,8 @@ type txIOKey struct {
 
 // TestTxInvalidTests ensures all of the tests in tx_invalid.json fail as
 // expected.
+//
+//nolint:goconst // reason: using constants would reduce readability in this specific case
 func TestTxInvalidTests(t *testing.T) {
 	file, err := os.ReadFile("data/tx_invalid.json")
 	if err != nil {

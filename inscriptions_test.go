@@ -11,7 +11,7 @@ import (
 
 	"github.com/libsv/go-bk/wif"
 	"github.com/libsv/go-bt/v2/bscript"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestInscribe(t *testing.T) {
@@ -47,7 +47,7 @@ func TestInscribe(t *testing.T) {
 
 			// Call the Inscribe function with the test data
 			err := tx.Inscribe(test.ia)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			// Check if the transaction has the expected number of outputs
 			if len(tx.Outputs) != 1 {

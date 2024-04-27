@@ -3,7 +3,6 @@ package bt_test
 import (
 	"context"
 	"encoding/json"
-	"github.com/stretchr/testify/require"
 	"testing"
 
 	"github.com/libsv/go-bk/wif"
@@ -11,6 +10,7 @@ import (
 	"github.com/libsv/go-bt/v2/bscript"
 	"github.com/libsv/go-bt/v2/unlocker"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestTxJSON_Node_JSON(t *testing.T) {
@@ -21,43 +21,43 @@ func TestTxJSON_Node_JSON(t *testing.T) {
 		"node standard tx should marshal and unmarshall correctly": {
 			tx: func() *bt.Tx {
 				tx := bt.NewTx()
-				assert.NoError(t, tx.From(
+				require.NoError(t, tx.From(
 					"3c8edde27cb9a9132c22038dac4391496be9db16fd21351565cc1006966fdad5",
 					0,
 					"76a914eb0bd5edba389198e73f8efabddfc61666969ff788ac",
 					2000000,
 				))
-				assert.NoError(t, tx.PayToAddress("n2wmGVP89x3DsLNqk3NvctfQy9m9pvt7mk", 1000))
+				require.NoError(t, tx.PayToAddress("n2wmGVP89x3DsLNqk3NvctfQy9m9pvt7mk", 1000))
 				var w *wif.WIF
 				w, err := wif.DecodeWIF("KznvCNc6Yf4iztSThoMH6oHWzH9EgjfodKxmeuUGPq5DEX5maspS")
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.NotNil(t, w)
 
 				err = tx.FillAllInputs(context.Background(), &unlocker.Getter{PrivateKey: w.PrivKey})
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				return tx
 			}(),
 		}, "node data tx should marshall correctly": {
 			tx: func() *bt.Tx {
 				tx := bt.NewTx()
-				assert.NoError(t, tx.From(
+				require.NoError(t, tx.From(
 					"3c8edde27cb9a9132c22038dac4391496be9db16fd21351565cc1006966fdad5",
 					0,
 					"76a914eb0bd5edba389198e73f8efabddfc61666969ff788ac",
 					2000000,
 				))
-				assert.NoError(t, tx.PayToAddress("n2wmGVP89x3DsLNqk3NvctfQy9m9pvt7mk", 1000))
+				require.NoError(t, tx.PayToAddress("n2wmGVP89x3DsLNqk3NvctfQy9m9pvt7mk", 1000))
 				var w *wif.WIF
 				w, err := wif.DecodeWIF("KznvCNc6Yf4iztSThoMH6oHWzH9EgjfodKxmeuUGPq5DEX5maspS")
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.NotNil(t, w)
 				s := &bscript.Script{}
-				assert.NoError(t, s.AppendPushDataString("test"))
+				require.NoError(t, s.AppendPushDataString("test"))
 				tx.AddOutput(&bt.Output{
 					LockingScript: s,
 				})
 				err = tx.FillAllInputs(context.Background(), &unlocker.Getter{PrivateKey: w.PrivKey})
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				return tx
 			}(),
 		},
@@ -65,12 +65,12 @@ func TestTxJSON_Node_JSON(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			bb, err := json.Marshal(test.tx.NodeJSON())
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			if err != nil {
 				return
 			}
 			tx := &bt.Tx{}
-			assert.NoError(t, json.Unmarshal(bb, tx.NodeJSON()))
+			require.NoError(t, json.Unmarshal(bb, tx.NodeJSON()))
 			assert.Equal(t, test.tx.String(), tx.String())
 		})
 	}
@@ -84,7 +84,7 @@ func TestTxJSON_Node_MarshallJSON(t *testing.T) {
 		"transaction with 1 input 1 p2pksh output 1 data output should create valid json": {
 			tx: func() *bt.Tx {
 				tx, err := bt.NewTxFromString("0100000001abad53d72f342dd3f338e5e3346b492440f8ea821f8b8800e318f461cc5ea5a2010000006a4730440220042edc1302c5463e8397120a56b28ea381c8f7f6d9bdc1fee5ebca00c84a76e2022077069bbdb7ed701c4977b7db0aba80d41d4e693112256660bb5d674599e390cf41210294639d6e4249ea381c2e077e95c78fc97afe47a52eb24e1b1595cd3fdd0afdf8ffffffff02000000000000000008006a0548656c6c6f7f030000000000001976a914b85524abf8202a961b847a3bd0bc89d3d4d41cc588ac00000000")
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				return tx
 			}(),
 			expJSON: `{
@@ -130,31 +130,31 @@ func TestTxJSON_Node_MarshallJSON(t *testing.T) {
 		}, "transaction with multiple Inputs": {
 			tx: func() *bt.Tx {
 				tx := bt.NewTx()
-				assert.NoError(t, tx.From(
+				require.NoError(t, tx.From(
 					"3c8edde27cb9a9132c22038dac4391496be9db16fd21351565cc1006966fdad5",
 					0,
 					"76a914eb0bd5edba389198e73f8efabddfc61666969ff788ac",
 					10000,
 				))
-				assert.NoError(t, tx.From(
+				require.NoError(t, tx.From(
 					"3c8edde27cb9a9132c22038dac4391496be9db16fd21351565cc1006966fdad5",
 					2,
 					"76a914eb0bd5edba389198e73f8efabddfc61666969ff788ac",
 					10000,
 				))
-				assert.NoError(t, tx.From(
+				require.NoError(t, tx.From(
 					"3c8edde27cb9a9132c22038dac4391496be9db16fd21351565cc1006966fdad5",
 					114,
 					"76a914eb0bd5edba389198e73f8efabddfc61666969ff788ac",
 					10000,
 				))
-				assert.NoError(t, tx.PayToAddress("n2wmGVP89x3DsLNqk3NvctfQy9m9pvt7mk", 1000))
+				require.NoError(t, tx.PayToAddress("n2wmGVP89x3DsLNqk3NvctfQy9m9pvt7mk", 1000))
 				var w *wif.WIF
 				w, err := wif.DecodeWIF("KznvCNc6Yf4iztSThoMH6oHWzH9EgjfodKxmeuUGPq5DEX5maspS")
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.NotNil(t, w)
 				err = tx.FillAllInputs(context.Background(), &unlocker.Getter{PrivateKey: w.PrivKey})
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				return tx
 			}(),
 			expJSON: `{
@@ -214,7 +214,7 @@ func TestTxJSON_Node_MarshallJSON(t *testing.T) {
 			testTx, err := bt.NewTxFromBytes(test.tx.Bytes())
 			require.NoError(t, err)
 			bb, err := json.MarshalIndent(testTx.NodeJSON(), "", "\t")
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, test.expJSON, string(bb))
 		})
 	}
@@ -270,7 +270,7 @@ func TestTxJSON_Node_UnmarshalJSON(t *testing.T) {
 			}`,
 			expTx: func() *bt.Tx {
 				tx, err := bt.NewTxFromString("0100000001abad53d72f342dd3f338e5e3346b492440f8ea821f8b8800e318f461cc5ea5a2010000006a4730440220042edc1302c5463e8397120a56b28ea381c8f7f6d9bdc1fee5ebca00c84a76e2022077069bbdb7ed701c4977b7db0aba80d41d4e693112256660bb5d674599e390cf41210294639d6e4249ea381c2e077e95c78fc97afe47a52eb24e1b1595cd3fdd0afdf8ffffffff02000000000000000008006a0548656c6c6f7f030000000000001976a914b85524abf8202a961b847a3bd0bc89d3d4d41cc588ac00000000")
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				return tx
 			}(),
 		}, "ONLY hex should map correctly": {
@@ -279,7 +279,7 @@ func TestTxJSON_Node_UnmarshalJSON(t *testing.T) {
 			}`,
 			expTx: func() *bt.Tx {
 				tx, err := bt.NewTxFromString("0100000001abad53d72f342dd3f338e5e3346b492440f8ea821f8b8800e318f461cc5ea5a2010000006a4730440220042edc1302c5463e8397120a56b28ea381c8f7f6d9bdc1fee5ebca00c84a76e2022077069bbdb7ed701c4977b7db0aba80d41d4e693112256660bb5d674599e390cf41210294639d6e4249ea381c2e077e95c78fc97afe47a52eb24e1b1595cd3fdd0afdf8ffffffff02000000000000000008006a0548656c6c6f7f030000000000001976a914b85524abf8202a961b847a3bd0bc89d3d4d41cc588ac00000000")
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				return tx
 			}(),
 		},
@@ -288,7 +288,7 @@ func TestTxJSON_Node_UnmarshalJSON(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			tx := bt.NewTx()
 			err := json.Unmarshal([]byte(test.json), tx.NodeJSON())
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, test.expTx, tx)
 		})
 	}
@@ -298,25 +298,25 @@ func TestTxJSON_Node_ToJson(t *testing.T) {
 	tx, _ := bt.NewTxFromString("0100000001abad53d72f342dd3f338e5e3346b492440f8ea821f8b8800e318f461cc5ea5a2010000006a4730440220042edc1302c5463e8397120a56b28ea381c8f7f6d9bdc1fee5ebca00c84a76e2022077069bbdb7ed701c4977b7db0aba80d41d4e693112256660bb5d674599e390cf41210294639d6e4249ea381c2e077e95c78fc97afe47a52eb24e1b1595cd3fdd0afdf8ffffffff02000000000000000008006a0548656c6c6f7f030000000000001976a914b85524abf8202a961b847a3bd0bc89d3d4d41cc588ac00000000")
 
 	_, err := json.MarshalIndent(tx.NodeJSON(), "", "\t")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 }
 
 func TestTxsJSON_Node(t *testing.T) {
 	tx, err := bt.NewTxFromString("0100000001abad53d72f342dd3f338e5e3346b492440f8ea821f8b8800e318f461cc5ea5a2010000006a4730440220042edc1302c5463e8397120a56b28ea381c8f7f6d9bdc1fee5ebca00c84a76e2022077069bbdb7ed701c4977b7db0aba80d41d4e693112256660bb5d674599e390cf41210294639d6e4249ea381c2e077e95c78fc97afe47a52eb24e1b1595cd3fdd0afdf8ffffffff02000000000000000008006a0548656c6c6f7f030000000000001976a914b85524abf8202a961b847a3bd0bc89d3d4d41cc588ac00000000")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	tx2, err := bt.NewTxFromString("020000000117d2011c2a3b8a309d481930bae86e88017b0f55845ada17f96c464684b3af520000000048473044022014a60c3e84cf0160cb7e4ee7d87a3b78c5efb6dd3b66c76970b680affdb95e8f02207f6d9e3268a934e5e278ae513a3bc6dee3bec7bae37204574480305bfb5dea0e41feffffff0240101024010000001976a9149933e4bad50e7dd4b48c1f0be98436ca7d4392a288ac00e1f505000000001976a914abbe187ad301e4326e59587e43d602edd318364e88ac77000000")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	txs := bt.Txs{tx, tx2}
 
 	bb, err := json.Marshal(txs.NodeJSON())
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	nTxs := make(bt.Txs, 0)
-	assert.NoError(t, json.Unmarshal(bb, nTxs.NodeJSON()))
+	require.NoError(t, json.Unmarshal(bb, nTxs.NodeJSON()))
 
-	assert.Equal(t, len(txs), len(nTxs))
+	assert.Len(t, txs, len(nTxs))
 	for i, tx := range txs {
 		assert.Equal(t, tx.String(), nTxs[i].String())
 	}
@@ -330,10 +330,10 @@ func TestTxsJSON_Node_MarshallJSON(t *testing.T) {
 		"transaction with 1 input 1 p2pksh output 1 data output should create valid json": {
 			tx: func() bt.Txs {
 				tx, err := bt.NewTxFromString("0100000001abad53d72f342dd3f338e5e3346b492440f8ea821f8b8800e318f461cc5ea5a2010000006a4730440220042edc1302c5463e8397120a56b28ea381c8f7f6d9bdc1fee5ebca00c84a76e2022077069bbdb7ed701c4977b7db0aba80d41d4e693112256660bb5d674599e390cf41210294639d6e4249ea381c2e077e95c78fc97afe47a52eb24e1b1595cd3fdd0afdf8ffffffff02000000000000000008006a0548656c6c6f7f030000000000001976a914b85524abf8202a961b847a3bd0bc89d3d4d41cc588ac00000000")
-				assert.NoError(t, err)
+				require.NoError(t, err)
 
 				tx2, err := bt.NewTxFromString("020000000117d2011c2a3b8a309d481930bae86e88017b0f55845ada17f96c464684b3af520000000048473044022014a60c3e84cf0160cb7e4ee7d87a3b78c5efb6dd3b66c76970b680affdb95e8f02207f6d9e3268a934e5e278ae513a3bc6dee3bec7bae37204574480305bfb5dea0e41feffffff0240101024010000001976a9149933e4bad50e7dd4b48c1f0be98436ca7d4392a288ac00e1f505000000001976a914abbe187ad301e4326e59587e43d602edd318364e88ac77000000")
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				return bt.Txs{tx, tx2}
 			}(),
 			expJSON: `[
@@ -422,34 +422,34 @@ func TestTxsJSON_Node_MarshallJSON(t *testing.T) {
 		}, "transaction with multiple Inputs": {
 			tx: func() bt.Txs {
 				tx := bt.NewTx()
-				assert.NoError(t, tx.From(
+				require.NoError(t, tx.From(
 					"3c8edde27cb9a9132c22038dac4391496be9db16fd21351565cc1006966fdad5",
 					0,
 					"76a914eb0bd5edba389198e73f8efabddfc61666969ff788ac",
 					10000,
 				))
-				assert.NoError(t, tx.From(
+				require.NoError(t, tx.From(
 					"3c8edde27cb9a9132c22038dac4391496be9db16fd21351565cc1006966fdad5",
 					2,
 					"76a914eb0bd5edba389198e73f8efabddfc61666969ff788ac",
 					10000,
 				))
-				assert.NoError(t, tx.From(
+				require.NoError(t, tx.From(
 					"3c8edde27cb9a9132c22038dac4391496be9db16fd21351565cc1006966fdad5",
 					114,
 					"76a914eb0bd5edba389198e73f8efabddfc61666969ff788ac",
 					10000,
 				))
-				assert.NoError(t, tx.PayToAddress("n2wmGVP89x3DsLNqk3NvctfQy9m9pvt7mk", 1000))
+				require.NoError(t, tx.PayToAddress("n2wmGVP89x3DsLNqk3NvctfQy9m9pvt7mk", 1000))
 				var w *wif.WIF
 				w, err := wif.DecodeWIF("KznvCNc6Yf4iztSThoMH6oHWzH9EgjfodKxmeuUGPq5DEX5maspS")
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.NotNil(t, w)
 				err = tx.FillAllInputs(context.Background(), &unlocker.Getter{PrivateKey: w.PrivKey})
-				assert.NoError(t, err)
+				require.NoError(t, err)
 
 				tx2, err := bt.NewTxFromString("020000000117d2011c2a3b8a309d481930bae86e88017b0f55845ada17f96c464684b3af520000000048473044022014a60c3e84cf0160cb7e4ee7d87a3b78c5efb6dd3b66c76970b680affdb95e8f02207f6d9e3268a934e5e278ae513a3bc6dee3bec7bae37204574480305bfb5dea0e41feffffff0240101024010000001976a9149933e4bad50e7dd4b48c1f0be98436ca7d4392a288ac00e1f505000000001976a914abbe187ad301e4326e59587e43d602edd318364e88ac77000000")
-				assert.NoError(t, err)
+				require.NoError(t, err)
 
 				return bt.Txs{tx, tx2}
 			}(),
@@ -557,7 +557,7 @@ func TestTxsJSON_Node_MarshallJSON(t *testing.T) {
 				testTxs = append(testTxs, testTx)
 			}
 			bb, err := json.MarshalIndent(testTxs.NodeJSON(), "", "\t")
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, test.expJSON, string(bb))
 		})
 	}
@@ -623,10 +623,10 @@ func TestTxsJSON_Node_UnmarshalJSON(t *testing.T) {
 ]`,
 			expTxs: func() bt.Txs {
 				tx, err := bt.NewTxFromString("0100000001abad53d72f342dd3f338e5e3346b492440f8ea821f8b8800e318f461cc5ea5a2010000006a4730440220042edc1302c5463e8397120a56b28ea381c8f7f6d9bdc1fee5ebca00c84a76e2022077069bbdb7ed701c4977b7db0aba80d41d4e693112256660bb5d674599e390cf41210294639d6e4249ea381c2e077e95c78fc97afe47a52eb24e1b1595cd3fdd0afdf8ffffffff02000000000000000008006a0548656c6c6f7f030000000000001976a914b85524abf8202a961b847a3bd0bc89d3d4d41cc588ac00000000")
-				assert.NoError(t, err)
+				require.NoError(t, err)
 
 				tx2, err := bt.NewTxFromString("020000000117d2011c2a3b8a309d481930bae86e88017b0f55845ada17f96c464684b3af520000000048473044022014a60c3e84cf0160cb7e4ee7d87a3b78c5efb6dd3b66c76970b680affdb95e8f02207f6d9e3268a934e5e278ae513a3bc6dee3bec7bae37204574480305bfb5dea0e41feffffff0240101024010000001976a9149933e4bad50e7dd4b48c1f0be98436ca7d4392a288ac00e1f505000000001976a914abbe187ad301e4326e59587e43d602edd318364e88ac77000000")
-				assert.NoError(t, err)
+				require.NoError(t, err)
 
 				return bt.Txs{tx, tx2}
 			}(),
@@ -636,7 +636,7 @@ func TestTxsJSON_Node_UnmarshalJSON(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			txs := make(bt.Txs, 0)
 			err := json.Unmarshal([]byte(test.json), txs.NodeJSON())
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, test.expTxs, txs)
 		})
 	}
@@ -652,7 +652,7 @@ func TestOutput_Node_JSON(t *testing.T) {
 				Satoshis: 10000,
 				LockingScript: func() *bscript.Script {
 					s, err := bscript.NewFromASM("OP_4 OP_2 OP_2 OP_ADD OP_EQUAL")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					return s
 				}(),
@@ -672,7 +672,7 @@ func TestOutput_Node_JSON(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			bb, err := json.MarshalIndent(test.output.NodeJSON(), "", "\t")
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			assert.Equal(t, test.expJSON, string(bb))
 		})
@@ -689,7 +689,7 @@ func TestOutput_JSON(t *testing.T) {
 				Satoshis: 10000,
 				LockingScript: func() *bscript.Script {
 					s, err := bscript.NewFromASM("OP_4 OP_2 OP_2 OP_ADD OP_EQUAL")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					return s
 				}(),
@@ -704,7 +704,7 @@ func TestOutput_JSON(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			bb, err := json.MarshalIndent(test.output, "", "\t")
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			assert.Equal(t, test.expJSON, string(bb))
 		})
@@ -730,7 +730,7 @@ func TestOutput_Node_UnmarshalJSON(t *testing.T) {
 				Satoshis: 10000,
 				LockingScript: func() *bscript.Script {
 					s, err := bscript.NewFromASM("OP_4 OP_2 OP_2 OP_ADD OP_EQUAL")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					return s
 				}(),
@@ -741,7 +741,7 @@ func TestOutput_Node_UnmarshalJSON(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			output := &bt.Output{}
-			assert.NoError(t, json.Unmarshal([]byte(test.json), output.NodeJSON()))
+			require.NoError(t, json.Unmarshal([]byte(test.json), output.NodeJSON()))
 
 			assert.Equal(t, *test.expOutput, *output)
 		})
@@ -762,7 +762,7 @@ func TestOutput_UnmarshalJSON(t *testing.T) {
 				Satoshis: 10000,
 				LockingScript: func() *bscript.Script {
 					s, err := bscript.NewFromASM("OP_4 OP_2 OP_2 OP_ADD OP_EQUAL")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					return s
 				}(),
@@ -773,7 +773,7 @@ func TestOutput_UnmarshalJSON(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			output := &bt.Output{}
-			assert.NoError(t, json.Unmarshal([]byte(test.json), output))
+			require.NoError(t, json.Unmarshal([]byte(test.json), output))
 
 			assert.Equal(t, *test.expOutput, *output)
 		})

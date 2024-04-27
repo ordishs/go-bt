@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestExtractDataFee(t *testing.T) {
@@ -15,7 +16,7 @@ func TestExtractDataFee(t *testing.T) {
 		fees := NewFeeQuote()
 		fee, err := fees.Fee(FeeTypeData)
 		assert.NotNil(t, fee)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, FeeTypeData, fee.FeeType)
 		assert.Equal(t, 5, fee.MiningFee.Satoshis)
 		assert.Equal(t, 100, fee.MiningFee.Bytes)
@@ -28,7 +29,7 @@ func TestExtractDataFee(t *testing.T) {
 		fees.AddQuote(FeeTypeData, nil)
 		fee, err := fees.Fee(FeeTypeData)
 		assert.Nil(t, fee)
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 }
 
@@ -36,7 +37,7 @@ func TestExtractStandardFee(t *testing.T) {
 	t.Run("get valid standard fee", func(t *testing.T) {
 		fees := NewFeeQuote()
 		fee, err := fees.Fee(FeeTypeStandard)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, fee)
 		assert.Equal(t, FeeTypeStandard, fee.FeeType)
 		assert.Equal(t, 5, fee.MiningFee.Satoshis)
@@ -49,7 +50,7 @@ func TestExtractStandardFee(t *testing.T) {
 		fees := NewFeeQuote()
 		fees.AddQuote(FeeTypeStandard, nil)
 		fee, err := fees.Fee(FeeTypeStandard)
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Nil(t, fee)
 	})
 }
@@ -58,12 +59,12 @@ func TestDefaultFees(t *testing.T) {
 	fees := NewFeeQuote()
 
 	fee, err := fees.Fee(FeeTypeData)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, fee)
 	assert.Equal(t, FeeTypeData, fee.FeeType)
 
 	fee, err = fees.Fee(FeeTypeStandard)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, fee)
 	assert.Equal(t, FeeTypeStandard, fee.FeeType)
 }
@@ -183,10 +184,10 @@ func TestFeeQuotes_AddMinerWithDefault(t *testing.T) {
 	fq := NewFeeQuotes("test")
 	quotes := fq.AddMinerWithDefault("test2")
 	quote, err := quotes.Quote("test2")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, quote)
 	fees, err := quote.Fee(FeeTypeStandard)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, defaultStandardFee(), fees)
 }
 
@@ -245,7 +246,7 @@ func TestFeeQuotes_AddMiner(t *testing.T) {
 			fq := NewFeeQuotes(test.minerName)
 			fq.AddMiner(test.minerName, test.fee)
 			q, err := fq.Quote(test.minerName)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, test.fee, q)
 		})
 	}
@@ -353,12 +354,12 @@ func TestFeeQuotes_UpdateMinerFees(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			fq, err := test.feeQuotes.UpdateMinerFees(test.minerName, test.feeType, test.fee)
 			if test.err != nil {
-				assert.Error(t, err)
+				require.Error(t, err)
 				assert.Nil(t, fq)
-				assert.EqualError(t, err, test.err.Error())
+				require.EqualError(t, err, test.err.Error())
 				return
 			}
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.NotNil(t, fq)
 			assert.Equal(t, test.expFeeQuote.fees[test.feeType], fq.fees[test.feeType])
 		})
@@ -433,7 +434,7 @@ func TestFeeQuotes_Quote(t *testing.T) {
 						Bytes:    10,
 					},
 				})
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				return fq
 			}(),
 			minerName: "test2",
@@ -459,12 +460,12 @@ func TestFeeQuotes_Quote(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			fq, err := test.fq.Quote(test.minerName)
 			if test.err != nil {
-				assert.Error(t, err)
+				require.Error(t, err)
 				assert.Nil(t, fq)
-				assert.EqualError(t, err, test.err.Error())
+				require.EqualError(t, err, test.err.Error())
 				return
 			}
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.NotNil(t, fq)
 			assert.Equal(t, test.expQuote.fees, fq.fees)
 		})
@@ -504,7 +505,7 @@ func TestFeeQuotes_Fee(t *testing.T) {
 						Bytes:    10,
 					},
 				})
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				return fq
 			}(),
 			minerName: "test2",
@@ -537,12 +538,12 @@ func TestFeeQuotes_Fee(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			fee, err := test.fq.Fee(test.minerName, test.feeType)
 			if test.err != nil {
-				assert.Error(t, err)
+				require.Error(t, err)
 				assert.Nil(t, fee)
-				assert.EqualError(t, err, test.err.Error())
+				require.EqualError(t, err, test.err.Error())
 				return
 			}
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.NotNil(t, fee)
 			assert.Equal(t, test.expFee, fee)
 		})
@@ -619,16 +620,16 @@ func TestFeeQuote_MarshalUnmarshalJSON(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			bb, err := json.Marshal(test.quote)
 			if err != nil {
-				assert.Error(t, err)
-				assert.EqualError(t, err, test.err.Error())
+				require.Error(t, err)
+				require.EqualError(t, err, test.err.Error())
 				return
 			}
 
 			var quote *FeeQuote
 			err = json.Unmarshal(bb, &quote)
 			if test.err != nil {
-				assert.Error(t, err)
-				assert.EqualError(t, err, test.err.Error())
+				require.Error(t, err)
+				require.EqualError(t, err, test.err.Error())
 				return
 			}
 			assert.Equal(t, test.quote, quote)

@@ -8,6 +8,7 @@ import (
 	"github.com/libsv/go-bt/v2/bscript/interpreter"
 	"github.com/libsv/go-bt/v2/bscript/interpreter/debug"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestDebugger_BeforeExecute(t *testing.T) {
@@ -42,10 +43,10 @@ func TestDebugger_BeforeExecute(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			lscript, err := bscript.NewFromHexString(test.lockingScriptHex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			uscript, err := bscript.NewFromHexString(test.unlockingScriptHex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			var timesCalled int
 			debugger := debug.NewDebugger()
@@ -138,10 +139,10 @@ func TestDebugger_BeforeStep(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			lscript, err := bscript.NewFromHexString(test.lockingScriptHex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			uscript, err := bscript.NewFromHexString(test.unlockingScriptHex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			history := &stateHistory{
 				dstack:  make([][]string, 0),
@@ -238,10 +239,10 @@ func TestDebugger_AfterStep(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			lscript, err := bscript.NewFromHexString(test.lockingScriptHex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			uscript, err := bscript.NewFromHexString(test.unlockingScriptHex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			history := &stateHistory{
 				dstack:  make([][]string, 0),
@@ -339,10 +340,10 @@ func TestDebugger_BeforeExecuteOpcode(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			lscript, err := bscript.NewFromHexString(test.lockingScriptHex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			uscript, err := bscript.NewFromHexString(test.unlockingScriptHex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			history := &stateHistory{
 				dstack:  make([][]string, 0),
@@ -439,10 +440,10 @@ func TestDebugger_AfterExecuteOpcode(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			lscript, err := bscript.NewFromHexString(test.lockingScriptHex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			uscript, err := bscript.NewFromHexString(test.unlockingScriptHex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			history := &stateHistory{
 				dstack:  make([][]string, 0),
@@ -522,10 +523,10 @@ func TestDebugger_BeforeScriptChange(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			lscript, err := bscript.NewFromHexString(test.lockingScriptHex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			uscript, err := bscript.NewFromHexString(test.unlockingScriptHex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			history := &stateHistory{
 				dstack:  make([][]string, 0),
@@ -609,10 +610,10 @@ func TestDebugger_AfterScriptChange(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			lscript, err := bscript.NewFromHexString(test.lockingScriptHex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			uscript, err := bscript.NewFromHexString(test.unlockingScriptHex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			history := &stateHistory{
 				dstack:  make([][]string, 0),
@@ -678,10 +679,10 @@ func TestDebugger_AfterExecution(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			lscript, err := bscript.NewFromHexString(test.lockingScriptHex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			uscript, err := bscript.NewFromHexString(test.unlockingScriptHex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			stack := make([]string, 0)
 			var opcode string
@@ -736,10 +737,10 @@ func TestDebugger_AfterError(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			lscript, err := bscript.NewFromHexString(test.lockingScriptHex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			uscript, err := bscript.NewFromHexString(test.unlockingScriptHex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			stack := make([]string, 0)
 			var opcode string
@@ -802,10 +803,10 @@ func TestDebugger_AfterSuccess(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			lscript, err := bscript.NewFromHexString(test.lockingScriptHex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			uscript, err := bscript.NewFromHexString(test.unlockingScriptHex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			stack := make([]string, 0)
 			var opcode string
@@ -908,10 +909,10 @@ func TestDebugger_BeforeStackPush(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			lscript, err := bscript.NewFromHexString(test.lockingScriptHex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			uscript, err := bscript.NewFromHexString(test.unlockingScriptHex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			history := &stateHistory{
 				dstack:  make([][]string, 0),
@@ -1017,10 +1018,10 @@ func TestDebugger_AfterStackPush(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			lscript, err := bscript.NewFromHexString(test.lockingScriptHex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			uscript, err := bscript.NewFromHexString(test.unlockingScriptHex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			history := &stateHistory{
 				dstack:  make([][]string, 0),
@@ -1118,10 +1119,10 @@ func TestDebugger_BeforeStackPop(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			lscript, err := bscript.NewFromHexString(test.lockingScriptHex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			uscript, err := bscript.NewFromHexString(test.unlockingScriptHex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			history := &stateHistory{
 				dstack:  make([][]string, 0),
@@ -1221,10 +1222,10 @@ func TestDebugger_AfterStackPop(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			lscript, err := bscript.NewFromHexString(test.lockingScriptHex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			uscript, err := bscript.NewFromHexString(test.unlockingScriptHex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			history := &stateHistory{
 				dstack:  make([][]string, 0),

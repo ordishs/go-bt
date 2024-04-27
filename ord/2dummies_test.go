@@ -12,6 +12,7 @@ import (
 	"github.com/libsv/go-bt/v2/ord"
 	"github.com/libsv/go-bt/v2/unlocker"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestBidToBuyPSBT2DNoErrors(t *testing.T) {
@@ -96,7 +97,7 @@ func TestBidToBuyPSBT2DNoErrors(t *testing.T) {
 	})
 
 	t.Run("no errors creating bid to buy ordinal", func(t *testing.T) {
-		assert.NoError(t, CreateBidError)
+		require.NoError(t, CreateBidError)
 	})
 
 	t.Run("validate PSBT bid to buy ordinal", func(t *testing.T) {
@@ -124,6 +125,6 @@ func TestBidToBuyPSBT2DNoErrors(t *testing.T) {
 				OrdinalUnlocker: ordUnlocker,
 			})
 
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	})
 }

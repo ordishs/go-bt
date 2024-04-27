@@ -23,8 +23,8 @@ func TestValidTransaction(t *testing.T) {
 	tx, err := bt.NewTxFromBytes(txBytes)
 	require.NoError(t, err)
 
-	assert.Equal(t, 1, len(tx.Inputs))
-	assert.Equal(t, 2, len(tx.Outputs))
+	assert.Len(t, tx.Inputs, 1)
+	assert.Len(t, tx.Outputs, 2)
 	assert.Equal(t, previousTxIDStr, tx.Inputs[0].PreviousTxIDStr())
 	assert.Equal(t, previousTxIDStr, tx.Inputs[0].PreviousTxIDChainHash().String())
 	// t.Logf("%x", tx.Inputs[0].PreviousTxIDChainHash().CloneBytes())
@@ -34,15 +34,15 @@ func TestValidTransaction2(t *testing.T) {
 	tx, err := bt.NewTxFromString(txStr)
 	require.NoError(t, err)
 
-	assert.Equal(t, 1, len(tx.Inputs))
-	assert.Equal(t, 2, len(tx.Outputs))
+	assert.Len(t, tx.Inputs, 1)
+	assert.Len(t, tx.Outputs, 2)
 	assert.Equal(t, previousTxIDStr, tx.Inputs[0].PreviousTxIDStr())
 	assert.Equal(t, previousTxIDStr, tx.Inputs[0].PreviousTxIDChainHash().String())
 	// t.Logf("%x", tx.Inputs[0].PreviousTxIDChainHash().CloneBytes())
 }
 
 func TestReadFrom(t *testing.T) {
-	assert.Equal(t, 148, len(inputBytes))
+	assert.Len(t, inputBytes, 148)
 
 	r := bytes.NewReader(inputBytes)
 

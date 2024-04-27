@@ -8,6 +8,7 @@ import (
 	"github.com/libsv/go-bt/v2/bscript"
 	"github.com/libsv/go-bt/v2/sighash"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestTx_CalcInputPreimage(t *testing.T) {
@@ -57,17 +58,17 @@ func TestTx_CalcInputPreimage(t *testing.T) {
 	for _, test := range testVector {
 		t.Run(test.name, func(t *testing.T) {
 			tx, err := bt.NewTxFromString(test.unsignedTx)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.NotNil(t, tx)
 
 			// Add the UTXO amount and script (PreviousTxScript already in unsigned tx)
 			tx.InputIdx(test.index).PreviousTxSatoshis = test.previousTxSatoshis
 			tx.InputIdx(test.index).PreviousTxScript, err = bscript.NewFromHexString(test.previousTxScript)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			var actualSigHash []byte
 			actualSigHash, err = tx.CalcInputPreimage(uint32(test.index), sighash.All|sighash.ForkID)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, test.expectedPreimage, hex.EncodeToString(actualSigHash))
 		})
 	}
@@ -147,17 +148,17 @@ func TestTx_CalcInputSignatureHash(t *testing.T) {
 	for _, test := range testVector {
 		t.Run(test.name, func(t *testing.T) {
 			tx, err := bt.NewTxFromString(test.unsignedTx)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.NotNil(t, tx)
 
 			// Add the UTXO amount and script (PreviousTxScript already in unsigned tx)
 			tx.Inputs[test.index].PreviousTxSatoshis = test.previousTxSatoshis
 			tx.Inputs[test.index].PreviousTxScript, err = bscript.NewFromHexString(test.previousTxScript)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			var actualSigHash []byte
 			actualSigHash, err = tx.CalcInputSignatureHash(test.index, test.sigHashType)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, test.expectedSigHash, hex.EncodeToString(actualSigHash))
 		})
 	}
@@ -210,17 +211,17 @@ func TestTx_CalcInputPreimageLegacy(t *testing.T) {
 	for _, test := range testVector {
 		t.Run(test.name, func(t *testing.T) {
 			tx, err := bt.NewTxFromString(test.unsignedTx)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.NotNil(t, tx)
 
 			// Add the UTXO amount and script (PreviousTxScript already in unsigned tx)
 			tx.InputIdx(test.index).PreviousTxSatoshis = test.previousTxSatoshis
 			tx.InputIdx(test.index).PreviousTxScript, err = bscript.NewFromHexString(test.previousTxScript)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			var actualSigHash []byte
 			actualSigHash, err = tx.CalcInputPreimageLegacy(uint32(test.index), test.sigHashType)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, test.expectedPreimage, hex.EncodeToString(actualSigHash))
 		})
 	}
