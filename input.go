@@ -221,3 +221,28 @@ func (i *Input) Bytes(clearLockingScript bool, intoBytes ...[]byte) []byte {
 		byte(i.SequenceNumber >> 24),
 	}...)
 }
+
+// ExtendedBytes encodes the Input into a hex byte array, including the EF transaction format information.
+func (i *Input) ExtendedBytes(clearLockingScript bool, intoBytes ...[]byte) []byte {
+	h := i.Bytes(clearLockingScript, intoBytes...)
+	h = append(h, []byte{
+		byte(i.PreviousTxSatoshis),
+		byte(i.PreviousTxSatoshis >> 8),
+		byte(i.PreviousTxSatoshis >> 16),
+		byte(i.PreviousTxSatoshis >> 24),
+		byte(i.PreviousTxSatoshis >> 32),
+		byte(i.PreviousTxSatoshis >> 40),
+		byte(i.PreviousTxSatoshis >> 48),
+		byte(i.PreviousTxSatoshis >> 56),
+	}...)
+
+	if i.PreviousTxScript != nil {
+		l := uint64(len(*i.PreviousTxScript))
+		h = append(h, VarInt(l).Bytes()...)
+		h = append(h, *i.PreviousTxScript...)
+	} else {
+		h = append(h, 0x00) // The length of the script is zero
+	}
+
+	return h
+}

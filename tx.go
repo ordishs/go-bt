@@ -443,27 +443,10 @@ func (tx *Tx) toBytesHelper(index int, lockingScript []byte, extended bool) []by
 			h = append(h, VarInt(uint64(len(lockingScript))).Bytes()...)
 			h = append(h, lockingScript...)
 		} else {
-			h = in.Bytes(lockingScript != nil, h)
-		}
-
-		if extended {
-			h = append(h, []byte{
-				byte(in.PreviousTxSatoshis),
-				byte(in.PreviousTxSatoshis >> 8),
-				byte(in.PreviousTxSatoshis >> 16),
-				byte(in.PreviousTxSatoshis >> 24),
-				byte(in.PreviousTxSatoshis >> 32),
-				byte(in.PreviousTxSatoshis >> 40),
-				byte(in.PreviousTxSatoshis >> 48),
-				byte(in.PreviousTxSatoshis >> 56),
-			}...)
-
-			if in.PreviousTxScript != nil {
-				l := uint64(len(*in.PreviousTxScript))
-				h = append(h, VarInt(l).Bytes()...)
-				h = append(h, *in.PreviousTxScript...)
+			if extended {
+				h = in.ExtendedBytes(lockingScript != nil, h)
 			} else {
-				h = append(h, 0x00) // The length of the script is zero
+				h = in.Bytes(lockingScript != nil, h)
 			}
 		}
 	}
