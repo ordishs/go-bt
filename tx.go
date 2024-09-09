@@ -382,7 +382,7 @@ func (tx *Tx) Clone() *Tx {
 
 	for i, input := range tx.Inputs {
 		clone.Inputs[i] = &Input{
-			previousTxIDHash:   (*chainhash.Hash)(input.previousTxIDHash.CloneBytes()),
+			previousTxIDHash:   (*chainhash.Hash)(input.previousTxIDHash[:]),
 			PreviousTxSatoshis: input.PreviousTxSatoshis,
 			PreviousTxOutIndex: input.PreviousTxOutIndex,
 			SequenceNumber:     input.SequenceNumber,
@@ -401,6 +401,47 @@ func (tx *Tx) Clone() *Tx {
 		}
 		if output.LockingScript != nil {
 			clone.Outputs[i].LockingScript = bscript.NewFromBytes(*output.LockingScript)
+		}
+	}
+
+	return clone
+}
+
+// ShallowClone returns a clone of the tx, but only clones the elements of the tx
+// that are mutated in the signing process.
+func (tx *Tx) ShallowClone() *Tx {
+	// Creating a new Tx from scratch is much faster than cloning from bytes
+	// ~ 420ns/op vs 2200ns/op of the above function in benchmarking
+	// this matters as we clone txs a couple of times when verifying signatures
+	clone := &Tx{
+		Version:  tx.Version,
+		LockTime: tx.LockTime,
+		Inputs:   make([]*Input, len(tx.Inputs)),
+		Outputs:  make([]*Output, len(tx.Outputs)),
+	}
+
+	for i, input := range tx.Inputs {
+		clone.Inputs[i] = &Input{
+			previousTxIDHash:   (*chainhash.Hash)(input.previousTxIDHash[:]),
+			PreviousTxSatoshis: input.PreviousTxSatoshis,
+			PreviousTxOutIndex: input.PreviousTxOutIndex,
+			SequenceNumber:     input.SequenceNumber,
+		}
+		if input.UnlockingScript != nil {
+			clone.Inputs[i].UnlockingScript = input.UnlockingScript
+		}
+		if input.PreviousTxScript != nil {
+			// previousTxScript needs to be cloned as it is mutated in the signing process
+			clone.Inputs[i].PreviousTxScript = bscript.NewFromBytes(*input.PreviousTxScript)
+		}
+	}
+
+	for i, output := range tx.Outputs {
+		clone.Outputs[i] = &Output{
+			Satoshis: output.Satoshis,
+		}
+		if output.LockingScript != nil {
+			clone.Outputs[i].LockingScript = output.LockingScript
 		}
 	}
 
