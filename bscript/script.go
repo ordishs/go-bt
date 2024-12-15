@@ -227,6 +227,11 @@ func (s *Script) String() string {
 	return hex.EncodeToString(*s)
 }
 
+// Bytes implements the Byte interface and returns the byte slice of script.
+func (s *Script) Bytes() []byte {
+	return *s
+}
+
 // ToASM returns the string ASM opcodes of the script.
 func (s *Script) ToASM() (string, error) {
 	if s == nil || len(*s) == 0 {

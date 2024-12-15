@@ -94,7 +94,7 @@ func (tx *Tx) CalcInputPreimage(inputNumber uint32, sigHashFlag sighash.Flag) ([
 		hashOutputs = tx.OutputsHash(int32(inputNumber))
 	}
 
-	buf := make([]byte, 0)
+	buf := make([]byte, 0, 256)
 
 	// Version
 	v := make([]byte, 4)

@@ -1982,7 +1982,7 @@ func opcodeCheckSig(op *ParsedOpcode, t *thread) error {
 		return err
 	}
 
-	txCopy := t.tx.Clone()
+	txCopy := t.tx.ShallowClone()
 	txCopy.Inputs[t.inputIdx].PreviousTxScript = up
 
 	hash, err = txCopy.CalcInputSignatureHash(uint32(t.inputIdx), shf)
@@ -2247,7 +2247,7 @@ func opcodeCheckMultiSig(op *ParsedOpcode, t *thread) error {
 		}
 
 		// Generate the signature hash based on the signature hash type.
-		txCopy := t.tx.Clone()
+		txCopy := t.tx.ShallowClone()
 		txCopy.Inputs[t.inputIdx].PreviousTxScript = up
 
 		signatureHash, err := txCopy.CalcInputSignatureHash(uint32(t.inputIdx), shf)

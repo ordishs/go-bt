@@ -42,6 +42,9 @@ type Tx struct {
 	Outputs  []*Output `json:"outputs"`
 	Version  uint32    `json:"version"`
 	LockTime uint32    `json:"locktime"`
+
+	// local cache of the txid
+	txHash *chainhash.Hash
 }
 
 // Txs a collection of *bt.Tx.
@@ -301,7 +304,17 @@ func (tx *Tx) TxID() string {
 	return tx.TxIDChainHash().String()
 }
 
+// SetTxHash should only be used when the transaction hash is known and the transaction will not change
+// this can be used to optimize processes that depend on the txid and avoid recalculating it
+func (tx *Tx) SetTxHash(hash *chainhash.Hash) {
+	tx.txHash = hash
+}
+
 func (tx *Tx) TxIDChainHash() *chainhash.Hash {
+	if tx.txHash != nil {
+		return tx.txHash
+	}
+
 	hash := chainhash.DoubleHashH(tx.Bytes())
 	return &hash
 }
@@ -369,7 +382,7 @@ func (tx *Tx) Clone() *Tx {
 
 	for i, input := range tx.Inputs {
 		clone.Inputs[i] = &Input{
-			previousTxIDHash:   (*chainhash.Hash)(input.previousTxIDHash.CloneBytes()),
+			previousTxIDHash:   (*chainhash.Hash)(input.previousTxIDHash[:]),
 			PreviousTxSatoshis: input.PreviousTxSatoshis,
 			PreviousTxOutIndex: input.PreviousTxOutIndex,
 			SequenceNumber:     input.SequenceNumber,
@@ -388,6 +401,47 @@ func (tx *Tx) Clone() *Tx {
 		}
 		if output.LockingScript != nil {
 			clone.Outputs[i].LockingScript = bscript.NewFromBytes(*output.LockingScript)
+		}
+	}
+
+	return clone
+}
+
+// ShallowClone returns a clone of the tx, but only clones the elements of the tx
+// that are mutated in the signing process.
+func (tx *Tx) ShallowClone() *Tx {
+	// Creating a new Tx from scratch is much faster than cloning from bytes
+	// ~ 420ns/op vs 2200ns/op of the above function in benchmarking
+	// this matters as we clone txs a couple of times when verifying signatures
+	clone := &Tx{
+		Version:  tx.Version,
+		LockTime: tx.LockTime,
+		Inputs:   make([]*Input, len(tx.Inputs)),
+		Outputs:  make([]*Output, len(tx.Outputs)),
+	}
+
+	for i, input := range tx.Inputs {
+		clone.Inputs[i] = &Input{
+			previousTxIDHash:   (*chainhash.Hash)(input.previousTxIDHash[:]),
+			PreviousTxSatoshis: input.PreviousTxSatoshis,
+			PreviousTxOutIndex: input.PreviousTxOutIndex,
+			SequenceNumber:     input.SequenceNumber,
+		}
+		if input.UnlockingScript != nil {
+			clone.Inputs[i].UnlockingScript = input.UnlockingScript
+		}
+		if input.PreviousTxScript != nil {
+			// previousTxScript needs to be cloned as it is mutated in the signing process
+			clone.Inputs[i].PreviousTxScript = bscript.NewFromBytes(*input.PreviousTxScript)
+		}
+	}
+
+	for i, output := range tx.Outputs {
+		clone.Outputs[i] = &Output{
+			Satoshis: output.Satoshis,
+		}
+		if output.LockingScript != nil {
+			clone.Outputs[i].LockingScript = output.LockingScript
 		}
 	}
 
@@ -443,27 +497,10 @@ func (tx *Tx) toBytesHelper(index int, lockingScript []byte, extended bool) []by
 			h = append(h, VarInt(uint64(len(lockingScript))).Bytes()...)
 			h = append(h, lockingScript...)
 		} else {
-			h = in.Bytes(lockingScript != nil, h)
-		}
-
-		if extended {
-			h = append(h, []byte{
-				byte(in.PreviousTxSatoshis),
-				byte(in.PreviousTxSatoshis >> 8),
-				byte(in.PreviousTxSatoshis >> 16),
-				byte(in.PreviousTxSatoshis >> 24),
-				byte(in.PreviousTxSatoshis >> 32),
-				byte(in.PreviousTxSatoshis >> 40),
-				byte(in.PreviousTxSatoshis >> 48),
-				byte(in.PreviousTxSatoshis >> 56),
-			}...)
-
-			if in.PreviousTxScript != nil {
-				l := uint64(len(*in.PreviousTxScript))
-				h = append(h, VarInt(l).Bytes()...)
-				h = append(h, *in.PreviousTxScript...)
+			if extended {
+				h = in.ExtendedBytes(lockingScript != nil, h)
 			} else {
-				h = append(h, 0x00) // The length of the script is zero
+				h = in.Bytes(lockingScript != nil, h)
 			}
 		}
 	}
