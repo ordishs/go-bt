@@ -220,3 +220,246 @@ func TestMarshalling(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "24988b93623304735e42a71f5c1e161b9ee2b9c52a3be8260ea3b05fba4df22c", myData2.Hash.String())
 }
+
+func TestHashMarshal(t *testing.T) {
+	h := DoubleHashH([]byte("test"))
+	tests := []struct {
+		name    string
+		hash    *Hash
+		want    []byte
+		wantErr bool
+	}{
+		{
+			name:    "nil hash",
+			hash:    nil,
+			want:    nil,
+			wantErr: false,
+		},
+		{
+			name:    "valid hash",
+			hash:    (*Hash)(&h),
+			want:    h[:],
+			wantErr: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := tt.hash.Marshal()
+			if tt.wantErr {
+				assert.Error(t, err)
+				return
+			}
+
+			assert.NoError(t, err)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestHashMarshalTo(t *testing.T) {
+	h := DoubleHashH([]byte("test"))
+	tests := []struct {
+		name    string
+		hash    *Hash
+		data    []byte
+		want    int
+		wantErr bool
+	}{
+		{
+			name:    "nil hash",
+			hash:    nil,
+			data:    make([]byte, HashSize),
+			want:    0,
+			wantErr: false,
+		},
+		{
+			name:    "valid hash",
+			hash:    (*Hash)(&h),
+			data:    make([]byte, HashSize),
+			want:    HashSize,
+			wantErr: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			n, err := tt.hash.MarshalTo(tt.data)
+			if tt.wantErr {
+				assert.Error(t, err)
+				return
+			}
+
+			assert.NoError(t, err)
+			assert.Equal(t, tt.want, n)
+
+			if tt.hash != nil {
+				assert.Equal(t, tt.hash[:], tt.data)
+			}
+		})
+	}
+}
+
+func TestHashUnmarshal(t *testing.T) {
+	h := DoubleHashH([]byte("test"))
+	tests := []struct {
+		name    string
+		data    []byte
+		wantErr bool
+	}{
+		{
+			name:    "invalid length",
+			data:    []byte("too short"),
+			wantErr: true,
+		},
+		{
+			name:    "valid hash",
+			data:    h[:],
+			wantErr: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			hash := new(Hash)
+			err := hash.Unmarshal(tt.data)
+
+			if tt.wantErr {
+				assert.Error(t, err)
+				return
+			}
+
+			assert.NoError(t, err)
+			assert.True(t, bytes.Equal(tt.data, hash[:]))
+		})
+	}
+}
+
+func TestHashSize(t *testing.T) {
+	h := DoubleHashH([]byte("test"))
+	tests := []struct {
+		name string
+		hash *Hash
+		want int
+	}{
+		{
+			name: "nil hash",
+			hash: nil,
+			want: 0,
+		},
+		{
+			name: "valid hash",
+			hash: (*Hash)(&h),
+			want: HashSize,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.hash.Size()
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestHashProtobufSerialization(t *testing.T) {
+	// Create an original hash
+	original := DoubleHashH([]byte("test data"))
+	h := (*Hash)(&original)
+
+	// Marshal to protobuf format
+	data, err := h.Marshal()
+	assert.NoError(t, err)
+	assert.NotNil(t, data)
+	assert.Equal(t, HashSize, len(data))
+
+	// Create a new hash and unmarshal the data
+	unmarshaled := new(Hash)
+	err = unmarshaled.Unmarshal(data)
+	assert.NoError(t, err)
+
+	// Verify the unmarshaled hash matches the original
+	assert.Equal(t, h[:], unmarshaled[:])
+	assert.Equal(t, original[:], unmarshaled[:])
+}
+
+func TestHashSQLSerialization(t *testing.T) {
+	// Test cases for scanning different types of input
+	testCases := []struct {
+		name     string
+		input    interface{}
+		wantHash *Hash
+		wantErr  bool
+	}{
+		{
+			name:     "scan nil",
+			input:    nil,
+			wantHash: &Hash{},
+			wantErr:  true,
+		},
+		{
+			name:     "scan bytes",
+			input:    mainNetGenesisHash[:],
+			wantHash: &mainNetGenesisHash,
+			wantErr:  false,
+		},
+		{
+			name:     "scan string",
+			input:    mainNetGenesisHash.String(),
+			wantHash: &mainNetGenesisHash,
+			wantErr:  false,
+		},
+		{
+			name:     "scan invalid bytes",
+			input:    []byte{0x00},
+			wantHash: &Hash{},
+			wantErr:  true,
+		},
+		{
+			name:     "scan invalid string",
+			input:    "invalid",
+			wantHash: &Hash{},
+			wantErr:  true,
+		},
+		{
+			name:     "scan unsupported type",
+			input:    123,
+			wantHash: &Hash{},
+			wantErr:  true,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			var hash Hash
+			err := hash.Scan(tc.input)
+			if tc.wantErr {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+				assert.Equal(t, tc.wantHash, &hash)
+			}
+		})
+	}
+
+	// Test Value() method
+	t.Run("value nil hash", func(t *testing.T) {
+		var hash *Hash
+		val, err := hash.Value()
+		require.NoError(t, err)
+		assert.Nil(t, val)
+	})
+
+	t.Run("value non-nil hash", func(t *testing.T) {
+		hash := mainNetGenesisHash
+		val, err := hash.Value()
+		require.NoError(t, err)
+		assert.Equal(t, mainNetGenesisHash[:], val)
+
+		// Verify we can scan the value back
+		var newHash Hash
+		err = newHash.Scan(val)
+		require.NoError(t, err)
+		assert.Equal(t, hash, newHash)
+	})
+}

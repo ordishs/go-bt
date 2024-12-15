@@ -7,6 +7,7 @@ package chainhash
 
 import (
 	"bytes"
+	"database/sql/driver"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -155,39 +156,86 @@ func Decode(dst *Hash, src string) error {
 
 	return nil
 }
-func (hash Hash) Marshal() ([]byte, error) {
-	if len(hash) == 0 {
+
+// Marshal implements proto.Marshaler
+func (hash *Hash) Marshal() ([]byte, error) {
+	if hash == nil {
 		return nil, nil
 	}
-	return hash.CloneBytes(), nil
+
+	return hash[:], nil
 }
 
-func (hash Hash) MarshalTo(data []byte) (n int, err error) {
-	if len(hash) == 0 {
+// MarshalTo implements proto.Marshaler
+func (hash *Hash) MarshalTo(data []byte) (n int, err error) {
+	if hash == nil {
 		return 0, nil
 	}
-	copy(data, hash.CloneBytes())
-	return 16, nil
+
+	copy(data, hash[:])
+
+	return HashSize, nil
 }
 
+// Unmarshal implements proto.Unmarshaler
 func (hash *Hash) Unmarshal(data []byte) error {
-	if len(data) == 0 {
+	if data == nil {
 		return nil
 	}
-	id := &Hash{}
-	copy(id[:], data)
-	*hash = *id
+
+	if len(data) != HashSize {
+		return fmt.Errorf("cannot unmarshal to chainhash.Hash: expected %d bytes, got %d", HashSize, len(data))
+	}
+
+	copy(hash[:], data)
+
 	return nil
+}
+
+// Size implements proto.Sizer
+func (hash *Hash) Size() int {
+	if hash == nil {
+		return 0
+	}
+
+	return HashSize
 }
 
 func (hash Hash) Equal(other Hash) bool {
 	return bytes.Equal(hash[0:], other[0:])
 }
 
-func (hash *Hash) Size() int {
+// Scan implements the sql.Scanner
+func (hash *Hash) Scan(value interface{}) error {
+	switch v := value.(type) {
+	case []byte:
+		h, err := NewHash(v)
+		if err != nil {
+			return fmt.Errorf("failed to convert bytes to hash: %v", err)
+		}
+
+		*hash = *h
+
+		return nil
+	case string:
+		h, err := NewHashFromStr(v)
+		if err != nil {
+			return fmt.Errorf("failed to convert string to hash: %v", err)
+		}
+
+		*hash = *h
+
+		return nil
+	default:
+		return fmt.Errorf("unsupported type for hash: %T", value)
+	}
+}
+
+// Value implements the driver.Valuer
+func (hash *Hash) Value() (driver.Value, error) {
 	if hash == nil {
-		return 0
+		return nil, nil
 	}
 
-	return len(*hash)
+	return hash[:], nil
 }
