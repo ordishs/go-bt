@@ -12,6 +12,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+
+	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
 // HashSize of array used to store hashes.  See Hash.
@@ -173,6 +176,12 @@ func (h *Hash) Unmarshal(data []byte) error {
 	}
 	copy(h[:], data)
 	return nil
+}
+
+var _ proto.Message = (*Hash)(nil)
+
+func (h *Hash) ProtoReflect() protoreflect.Message {
+	return nil // `nil` is acceptable for non-nested fields like bytes
 }
 
 // Size implements proto.Sizer
