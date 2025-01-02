@@ -10,6 +10,7 @@ import (
 	"database/sql/driver"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 )
 
@@ -157,7 +158,6 @@ func Decode(dst *Hash, src string) error {
 	return nil
 }
 
-// Marshal implements proto.Marshaler
 func (hash *Hash) Marshal() ([]byte, error) {
 	if hash == nil {
 		return nil, nil
@@ -166,29 +166,12 @@ func (hash *Hash) Marshal() ([]byte, error) {
 	return hash[:], nil
 }
 
-// MarshalTo implements proto.Marshaler
-func (hash *Hash) MarshalTo(data []byte) (n int, err error) {
-	if hash == nil {
-		return 0, nil
+// Unmarshal converts a protobuf []byte to chainhash.Hash.
+func (h *Hash) Unmarshal(data []byte) error {
+	if len(data) != 32 {
+		return errors.New("invalid length for chainhash.Hash")
 	}
-
-	copy(data, hash[:])
-
-	return HashSize, nil
-}
-
-// Unmarshal implements proto.Unmarshaler
-func (hash *Hash) Unmarshal(data []byte) error {
-	if data == nil {
-		return nil
-	}
-
-	if len(data) != HashSize {
-		return fmt.Errorf("cannot unmarshal to chainhash.Hash: expected %d bytes, got %d", HashSize, len(data))
-	}
-
-	copy(hash[:], data)
-
+	copy(h[:], data)
 	return nil
 }
 

@@ -284,17 +284,17 @@ func TestHashMarshalTo(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			n, err := tt.hash.MarshalTo(tt.data)
+			bytes, err := tt.hash.Marshal()
 			if tt.wantErr {
 				assert.Error(t, err)
 				return
 			}
 
 			assert.NoError(t, err)
-			assert.Equal(t, tt.want, n)
+			assert.Equal(t, tt.want, len(bytes))
 
 			if tt.hash != nil {
-				assert.Equal(t, tt.hash[:], tt.data)
+				assert.Equal(t, tt.hash[:], bytes)
 			}
 		})
 	}
