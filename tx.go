@@ -290,7 +290,7 @@ func (tx *Tx) IsExtended() bool {
 	}
 
 	for _, input := range tx.Inputs {
-		if input.PreviousTxScript == nil || (input.PreviousTxSatoshis == 0 && !input.PreviousTxScript.IsData()) {
+		if input.PreviousTxScript == nil {
 			return false
 		}
 	}
