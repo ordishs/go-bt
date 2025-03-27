@@ -45,6 +45,8 @@ type Tx struct {
 
 	// local cache of the txid
 	txHash *chainhash.Hash
+
+	Tag string `json:"-"` // This is a tag used for testing and debugging where we can add any arbitrary text to help identify the tx
 }
 
 // Txs a collection of *bt.Tx.
