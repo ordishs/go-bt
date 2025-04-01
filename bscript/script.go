@@ -474,14 +474,20 @@ func (s *Script) ScriptType() string {
 }
 
 // Addresses will return all addresses found in the script, if any.
-func (s *Script) Addresses() ([]string, error) {
+// param mainnetBool if true, will return mainnet addresses, if false will return testnet addresses
+func (s *Script) Addresses(mainnetBool ...bool) ([]string, error) {
+	mainnet := true
+	if len(mainnetBool) == 0 {
+		mainnet = mainnetBool[0]
+	}
+
 	addresses := make([]string, 0)
 	if s.IsP2PKH() {
 		pkh, err := s.PublicKeyHash()
 		if err != nil {
 			return nil, err
 		}
-		a, err := NewAddressFromPublicKeyHash(pkh, true)
+		a, err := NewAddressFromPublicKeyHash(pkh, mainnet)
 		if err != nil {
 			return nil, err
 		}
