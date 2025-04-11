@@ -477,7 +477,7 @@ func (s *Script) ScriptType() string {
 // param mainnetBool if true, will return mainnet addresses, if false will return testnet addresses
 func (s *Script) Addresses(mainnetBool ...bool) ([]string, error) {
 	mainnet := true
-	if len(mainnetBool) == 0 {
+	if len(mainnetBool) > 0 {
 		mainnet = mainnetBool[0]
 	}
 

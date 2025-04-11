@@ -28,7 +28,6 @@ func TestTxJSON_Node_JSON(t *testing.T) {
 					2000000,
 				))
 				require.NoError(t, tx.PayToAddress("n2wmGVP89x3DsLNqk3NvctfQy9m9pvt7mk", 1000))
-				var w *wif.WIF
 				w, err := wif.DecodeWIF("KznvCNc6Yf4iztSThoMH6oHWzH9EgjfodKxmeuUGPq5DEX5maspS")
 				require.NoError(t, err)
 				assert.NotNil(t, w)
@@ -47,7 +46,6 @@ func TestTxJSON_Node_JSON(t *testing.T) {
 					2000000,
 				))
 				require.NoError(t, tx.PayToAddress("n2wmGVP89x3DsLNqk3NvctfQy9m9pvt7mk", 1000))
-				var w *wif.WIF
 				w, err := wif.DecodeWIF("KznvCNc6Yf4iztSThoMH6oHWzH9EgjfodKxmeuUGPq5DEX5maspS")
 				require.NoError(t, err)
 				assert.NotNil(t, w)
