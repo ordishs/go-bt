@@ -10,6 +10,7 @@ require (
 	github.com/stretchr/testify v1.8.2
 	golang.org/x/crypto v0.14.0
 	golang.org/x/sync v0.4.0
+	google.golang.org/protobuf v1.36.6
 )
 
 require (
