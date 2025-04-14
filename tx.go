@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"sync/atomic"
 
 	"github.com/libsv/go-bt/v2/bscript"
 	"github.com/libsv/go-bt/v2/chainhash"
@@ -44,7 +45,7 @@ type Tx struct {
 	LockTime uint32    `json:"locktime"`
 
 	// local cache of the txid
-	txHash *chainhash.Hash
+	txHash atomic.Pointer[chainhash.Hash]
 }
 
 // Txs a collection of *bt.Tx.
@@ -307,12 +308,13 @@ func (tx *Tx) TxID() string {
 // SetTxHash should only be used when the transaction hash is known and the transaction will not change
 // this can be used to optimize processes that depend on the txid and avoid recalculating it
 func (tx *Tx) SetTxHash(hash *chainhash.Hash) {
-	tx.txHash = hash
+	tx.txHash.Store(hash)
 }
 
 func (tx *Tx) TxIDChainHash() *chainhash.Hash {
-	if tx.txHash != nil {
-		return tx.txHash
+	txHash := tx.txHash.Load()
+	if txHash != nil {
+		return txHash
 	}
 
 	hash := chainhash.DoubleHashH(tx.Bytes())
