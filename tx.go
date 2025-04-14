@@ -293,18 +293,21 @@ func (tx *Tx) IsCoinbase() bool {
 }
 
 func (tx *Tx) IsExtended() bool {
-	// if tx == nil || tx.Inputs == nil {
-	// 	return false
-	// }
+	if tx == nil || tx.Inputs == nil {
+		return false
+	}
 
-	// for _, input := range tx.Inputs {
-	// 	if input.PreviousTxScript == nil {
-	// 		return false
-	// 	}
-	// }
+	if tx.extended {
+		return true
+	}
 
-	// return true
-	return tx.extended
+	for _, input := range tx.Inputs {
+		if input.PreviousTxScript == nil {
+			return false
+		}
+	}
+
+	return true
 }
 
 func (tx *Tx) SetExtended(extended bool) {
