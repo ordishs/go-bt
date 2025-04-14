@@ -42,9 +42,18 @@ type Tx struct {
 	Outputs  []*Output `json:"outputs"`
 	Version  uint32    `json:"version"`
 	LockTime uint32    `json:"locktime"`
+	extended bool
 
 	// local cache of the txid
 	txHash *chainhash.Hash
+}
+
+type ExtendedTx struct {
+	*Tx
+}
+
+func (etx *ExtendedTx) ToTx() *Tx {
+	return etx.Tx
 }
 
 // Txs a collection of *bt.Tx.
@@ -110,8 +119,6 @@ func (tx *Tx) ReadFrom(r io.Reader) (int64, error) {
 
 	tx.Version = binary.LittleEndian.Uint32(version)
 
-	extended := false
-
 	var inputCount VarInt
 
 	n64, err = inputCount.ReadFrom(r)
@@ -147,7 +154,7 @@ func (tx *Tx) ReadFrom(r io.Reader) (int64, error) {
 				return bytesRead, nil
 			}
 
-			extended = true
+			tx.extended = true
 
 			n64, err = inputCount.ReadFrom(r)
 			bytesRead += n64
@@ -165,7 +172,7 @@ func (tx *Tx) ReadFrom(r io.Reader) (int64, error) {
 	// create Inputs
 	for i := uint64(0); i < uint64(inputCount); i++ {
 		input := &Input{}
-		n64, err = input.readFrom(r, extended)
+		n64, err = input.readFrom(r, tx.extended)
 		bytesRead += n64
 		if err != nil {
 			return bytesRead, err
@@ -173,7 +180,7 @@ func (tx *Tx) ReadFrom(r io.Reader) (int64, error) {
 		tx.Inputs = append(tx.Inputs, input)
 	}
 
-	if inputCount > 0 || extended {
+	if inputCount > 0 || tx.extended {
 		// Re-read the actual output count...
 		n64, err = outputCount.ReadFrom(r)
 		bytesRead += n64
@@ -285,17 +292,36 @@ func (tx *Tx) IsCoinbase() bool {
 }
 
 func (tx *Tx) IsExtended() bool {
-	if tx == nil || tx.Inputs == nil {
-		return false
+	// if tx == nil || tx.Inputs == nil {
+	// 	return false
+	// }
+
+	// for _, input := range tx.Inputs {
+	// 	if input.PreviousTxScript == nil {
+	// 		return false
+	// 	}
+	// }
+
+	// return true
+	return tx.extended
+}
+
+func (tx *Tx) SetExtended(extended bool) {
+	tx.extended = extended
+}
+
+func (tx *Tx) ToExtendedTx() *ExtendedTx {
+	if tx == nil {
+		return nil
 	}
 
-	for _, input := range tx.Inputs {
-		if input.PreviousTxScript == nil {
-			return false
-		}
+	if !tx.IsExtended() {
+		return nil
 	}
 
-	return true
+	return &ExtendedTx{
+		Tx: tx,
+	}
 }
 
 // TxID returns the transaction ID of the transaction
